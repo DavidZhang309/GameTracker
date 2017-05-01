@@ -1,0 +1,4 @@
+{
+    "osu_api_key": "",
+    "mongodb_connection": "mongodb://localhost:27017/gametracker"
+}

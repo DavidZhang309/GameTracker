@@ -1,0 +1,17 @@
+{
+  "name": "gametracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app/index.js"
+  },
+  "author": "David Zhang",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^7.0.14",
+    "express": "^4.15.2",
+    "mongodb": "^2.2.26",
+    "typescript": "^2.3.2"
+  }
+}
