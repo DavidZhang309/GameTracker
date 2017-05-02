@@ -3,23 +3,38 @@ var https = require('https');
 var MongoClient = require('mongodb').MongoClient;
 
 export class OSUDataService {
-    public getBeatmapFromAPI(beatmapID, callback) {
+    protected queryAPI(api, args, callback) {
+        // build path
+        let path = api + '?k=' + config.osu_api_key;
+        let queryKeys = Object.keys;
+        for(let i = 0; i < queryKeys.length; i++) {
+            path += '&' + queryKeys[i] + '=' + args[queryKeys[i]];
+        }
+
+        // query api
         https.get({
             host: 'osu.ppy.sh',
-            path: '/api/get_beatmaps?k=' + config.osu_api_key + '&b=' + beatmapID,
+            path: path,
         }, function(httpResponse) {
             let data = '';
             httpResponse.on('data', function(chunk) {
                 data += chunk;
             });
             httpResponse.on('end', function() {
-                let result = JSON.parse(data);
-                if (result.length == 0) {
-                    callback(null);
-                } else {
-                    callback(result[0]);
-                }
+                callback(JSON.parse(data));
             });
+        });
+    }
+
+    public getBeatmapFromAPI(beatmapID, callback) {
+        this.queryAPI('/api/get_beatmaps', {
+            b: beatmapID
+        }, function(data) {
+            if (data.length == 0) {
+                callback(null);
+            } else {
+                callback(data[0]);
+            } 
         });
     }
 
