@@ -1,10 +1,10 @@
 {
-  "name": "gametracker",
+  "name": "app",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node app/index.js"
+    "start": "tsc && node build/index.js"
   },
   "author": "David Zhang",
   "license": "MIT",

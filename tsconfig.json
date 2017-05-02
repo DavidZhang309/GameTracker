@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "module": "system",
+        "outDir": "build/"
+    },
+    "include": [
+        "app/**/*.ts"
+    ]
+}
