@@ -1,6 +1,7 @@
 var config = require('../config.json');
 var https = require('https');
 var MongoClient = require('mongodb').MongoClient;
+var async = require('async');
 
 export class OSUDataService {
     protected queryAPI(api, args, callback) {
@@ -26,7 +27,7 @@ export class OSUDataService {
         });
     }
 
-    public getBeatmapFromAPI(beatmapID, callback) {
+    private getBeatmapFromAPI(beatmapID, callback) {
         this.queryAPI('/api/get_beatmaps', {
             b: beatmapID
         }, function(data) {
@@ -38,21 +39,16 @@ export class OSUDataService {
         });
     }
 
-    public getBeatmapFromCache(connection, beatmapID, callback) {
+    private getBeatmapsFromCache(connection, beatmapIDs, callback) {
         let bCollection = connection.collection('osu_beatmaps');
         bCollection.find({
-            beatmap_id: beatmapID
-            //beatmap_id: { $in: beatmaps }
+            beatmap_id: { $in: beatmapIDs }
         }).toArray(function(err, docs){
-            if (docs.length == 0) {
-                callback(null);
-            } else {
-                callback(docs[0]);
-            }
+            callback(docs);
         });
     }
 
-    public updateBeatmapCache(connection, beatmapID, beatmapData) {
+    private updateBeatmapCache(connection, beatmapID, beatmapData) {
         let bCollection = connection.collection('osu_beatmaps');
         bCollection.replaceOne({
             beatmap_id: beatmapID
@@ -61,33 +57,34 @@ export class OSUDataService {
         });
     }
 
-    public getBeatmap(connection, beatmapID, callback) {
-        let svc = this;
-        svc.getBeatmapFromCache(connection, beatmapID, function (data) {
-            if (data == null) {
-                svc.getBeatmapFromAPI(beatmapID, function(data) {
-                    svc.updateBeatmapCache(connection, beatmapID, data);
-                    callback(data);
-                });
-            } else {
-                callback(data);
-            }
-        })
-    }
-
     //TODO: handle error cases
-    public getBeatmaps(beatmaps, callback) {
-        let svc = this;
-        MongoClient.connect(config.mongodb_connection, function(err, db) {
-            let result = { };
-            for(let i = 0; i < beatmaps.length; i++) {
-                svc.getBeatmap(db, beatmaps[i], function(data) {
-                    result[beatmaps[i]] = data;
-                    if (Object.keys(result).length == beatmaps.length) { 
-                        callback(result);
+    public getBeatmaps(beatmapIDs, callback) {
+        MongoClient.connect(config.mongodb_connection, (err, db) => {
+            this.getBeatmapsFromCache(db, beatmapIDs, (data) => {
+                // get missing beatmaps
+                let missing = beatmapIDs.filter((beatmapID) => {
+                    for(let i = 0; data.length; i++) {
+                        if (beatmapID == data[i].beatmap_id) { return false; }
                     }
+                    return true;
                 });
-            }
+                
+
+                async.mapSeries(missing, (beatmapID, asyncCallback) => {
+                    this.getBeatmapFromAPI(beatmapID, (data) => {
+                        this.updateBeatmapCache(db, beatmapID, data);
+                        asyncCallback(data);
+                    })
+                }, (err, missingData) => {
+                    let resultData = data.concat(missingData);
+                    let result = { };
+                    for(let i = 0; i < resultData.length; i++) {
+                        result[resultData[i].beatmap_id] = resultData[i];
+                    }  
+                    callback(result);
+                });
+            })
+
         });
     }
 }
