@@ -1,13 +1,13 @@
 var config = require('../config.json');
 var https = require('https');
 var MongoClient = require('mongodb').MongoClient;
-var async = require('async');
+var asyncJS = require('async');
 
 export class OSUDataService {
     protected queryAPI(api, args, callback) {
         // build path
         let path = api + '?k=' + config.osu_api_key;
-        let queryKeys = Object.keys;
+        let queryKeys = Object.keys(args);
         for(let i = 0; i < queryKeys.length; i++) {
             path += '&' + queryKeys[i] + '=' + args[queryKeys[i]];
         }
@@ -63,22 +63,22 @@ export class OSUDataService {
             this.getBeatmapsFromCache(db, beatmapIDs, (data) => {
                 // get missing beatmaps
                 let missing = beatmapIDs.filter((beatmapID) => {
-                    for(let i = 0; data.length; i++) {
+                    for(let i = 0; i < data.length; i++) {
                         if (beatmapID == data[i].beatmap_id) { return false; }
                     }
                     return true;
                 });
-                
 
-                async.mapSeries(missing, (beatmapID, asyncCallback) => {
+                asyncJS.mapSeries(missing, (beatmapID, asyncCallback) => {
                     this.getBeatmapFromAPI(beatmapID, (data) => {
                         this.updateBeatmapCache(db, beatmapID, data);
-                        asyncCallback(data);
+                        asyncCallback(null, data);
                     })
                 }, (err, missingData) => {
                     let resultData = data.concat(missingData);
                     let result = { };
                     for(let i = 0; i < resultData.length; i++) {
+                        if (resultData[i] == null) { continue; }
                         result[resultData[i].beatmap_id] = resultData[i];
                     }  
                     callback(result);
