@@ -1,4 +1,4 @@
-var config = require('./config.json');
+var config = require('../config.json');
 var https = require('https');
 var MongoClient = require('mongodb').MongoClient;
 

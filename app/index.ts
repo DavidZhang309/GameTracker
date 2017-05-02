@@ -1,7 +1,7 @@
 //lib
 var express = require('express');
 
-import { OSUDataService } from './osu';
+import { OSUDataService } from './services/OSUDataService';
 
 let app = express();
 let OSUSvc = new OSUDataService();
