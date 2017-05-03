@@ -21,9 +21,7 @@ app.get('/osu/beatmaps', function(request, response){
     });
 });
 
-app.get('/', function(request, response) {
-    response.send('hello');
-});
+app.use('/app', express.static('./build/client'));
 
 app.listen(5590, function(){
     console.log('started');
