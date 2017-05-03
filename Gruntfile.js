@@ -1,10 +1,16 @@
 module.exports = function(grunt) {
     grunt.initConfig({
         copy: {
-            main: { // copies json files
+            json: { // copies json files
                 expand: true,
                 cwd: 'app',
                 src: '**/*.json',
+                dest: 'build/'
+            },
+            templates: {
+                expand: true,
+                cwd: 'app',
+                src: 'templates/**/*.handlebars',
                 dest: 'build/'
             }
         },
