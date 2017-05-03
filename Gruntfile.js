@@ -7,9 +7,16 @@ module.exports = function(grunt) {
                 src: '**/*.json',
                 dest: 'build/'
             }
+        },
+        sass: {
+            dist: {
+                files: {
+                    'build/client/site.css': 'app/client/sass/site.scss'
+                }
+            }
         }
     });
     grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.registerTask('default', ['copy']);
+    grunt.loadNpmTasks('grunt-contrib-sass');
+    grunt.registerTask('default', ['copy', 'sass']);
 }
-  
