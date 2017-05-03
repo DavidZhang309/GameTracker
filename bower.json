@@ -1,0 +1,19 @@
+{
+  "name": "gametracker",
+  "description": "Unified game profile",
+  "main": "index.js",
+  "authors": [
+    "David Zhang"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/DavidZhang309/GameTracker",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "build/client/bower_components",
+    "test",
+    "tests"
+  ]
+}
