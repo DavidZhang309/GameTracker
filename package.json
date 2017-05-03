@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc && node build/index.js"
+    "start": "grunt && tsc && node build/index.js"
   },
   "author": "David Zhang",
   "license": "MIT",
@@ -12,6 +12,8 @@
     "@types/node": "^7.0.14",
     "async": "^2.4.0",
     "express": "^4.15.2",
+    "grunt": "^1.0.1",
+    "grunt-contrib-copy": "^1.0.0",
     "mongodb": "^2.2.26",
     "typescript": "^2.3.2"
   }
