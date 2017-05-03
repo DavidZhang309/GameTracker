@@ -3,6 +3,7 @@ var https = require('https');
 var MongoClient = require('mongodb').MongoClient;
 var asyncJS = require('async');
 
+//TODO: handle error cases
 export class OSUDataService {
     protected queryAPI(api, args, callback) {
         // build path
@@ -39,6 +40,35 @@ export class OSUDataService {
         });
     }
 
+    public getProfile(userID, callback) {
+        this.queryAPI('/api/get_user', {
+            u: userID
+        }, function(data) {
+            if (data.length == 0) {
+                callback(null);
+            } else {
+                callback(data[0]);
+            } 
+        });
+    }
+
+    public getTopPerformances(userID, limit, callback) {
+        this.queryAPI('/api/get_user_best', {
+            u: userID,
+            limit: limit
+        }, function(data) {
+            callback(data);
+        });
+    }
+    public getRecentPlays(userID, limit, callback) {
+        this.queryAPI('/api/get_user_recent', {
+            u: userID,
+            limit: limit
+        }, function(data) {
+            callback(data);
+        });
+    }
+
     private getBeatmapsFromCache(connection, beatmapIDs, callback) {
         let bCollection = connection.collection('osu_beatmaps');
         bCollection.find({
@@ -57,7 +87,6 @@ export class OSUDataService {
         });
     }
 
-    //TODO: handle error cases
     public getBeatmaps(beatmapIDs, callback) {
         MongoClient.connect(config.mongodb_connection, (err, db) => {
             this.getBeatmapsFromCache(db, beatmapIDs, (data) => {
