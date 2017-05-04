@@ -5,6 +5,7 @@ if (global.Promise == null) {
 
 //lib
 import { OSURouter } from './middleware/OSURouter';
+import { SteamRouter } from './middleware/SteamRouter';
 import * as express from 'express';
 import * as exprhandlebars from 'express-handlebars';
 
@@ -17,8 +18,10 @@ app.set('views', './app/templates');
 app.set('view engine', 'handlebars');
 
 let osuRouter = new OSURouter();
+let steamRouter = new SteamRouter();
 
 app.use('/osu', osuRouter.router);
+app.use('/steam', steamRouter.router);
 app.get('/', (request, response) => {
     response.render('pages/home');
 })
