@@ -1,119 +1,133 @@
+import * as https from 'https';
+import * as mongodb from 'mongodb';
+import * as asyncJS from 'async';
+import * as querystring from 'querystring';
+import { BaseDataService } from './BaseDataService';
+
 var config = require('../config.json');
-var https = require('https');
-var MongoClient = require('mongodb').MongoClient;
-var asyncJS = require('async');
+var MongoClient = mongodb.MongoClient;
 
 //TODO: handle error cases
-export class OSUDataService {
-    protected queryAPI(api, args, callback) {
-        // build path
+export class OSUDataService extends BaseDataService {
+    public getAPIHost() {
+        return "osu.ppy.sh";
+    }
+
+    protected queryOSUAPI(api: string, args: object): Promise<Object[]> {
         let path = api + '?k=' + config.osu_api_key;
-        let queryKeys = Object.keys(args);
-        for(let i = 0; i < queryKeys.length; i++) {
-            path += '&' + queryKeys[i] + '=' + args[queryKeys[i]];
+        // build query string
+        let q = querystring.stringify(args);
+        if(q != '') {
+            path += '&' + q;
         }
-
-        // query api
-        https.get({
-            host: 'osu.ppy.sh',
-            path: path,
-        }, function(httpResponse) {
-            let data = '';
-            httpResponse.on('data', function(chunk) {
-                data += chunk;
-            });
-            httpResponse.on('end', function() {
-                callback(JSON.parse(data));
-            });
+        // query
+        return super.queryAPI(path, true).then((data) => {
+            return JSON.parse(data); 
         });
     }
 
-    private getBeatmapFromAPI(beatmapID, callback) {
-        this.queryAPI('/api/get_beatmaps', {
+    private getBeatmapFromAPI(beatmapID): Promise<Object> {
+        return this.queryOSUAPI('/api/get_beatmaps', {
             b: beatmapID
-        }, function(data) {
+        }).then(function(data) {
             if (data.length == 0) {
-                callback(null);
+                return null;
             } else {
-                callback(data[0]);
-            } 
+                return data[0];
+            }
         });
     }
 
-    public getProfile(userID, callback) {
-        this.queryAPI('/api/get_user', {
+    public getProfile(userID): Promise<Object> {
+        return this.queryOSUAPI('/api/get_user', {
             u: userID
-        }, function(data) {
+        }).then(function(data) {
             if (data.length == 0) {
-                callback(null);
+                return null;
             } else {
-                callback(data[0]);
+                return data[0];
             } 
         });
     }
 
-    public getTopPerformances(userID, limit, callback) {
-        this.queryAPI('/api/get_user_best', {
+    public getTopPerformances(userID, limit): Promise<Object[]> {
+        return this.queryOSUAPI('/api/get_user_best', {
             u: userID,
             limit: limit
-        }, function(data) {
-            callback(data);
+        }).then(function(data) {
+            return data;
         });
     }
-    public getRecentPlays(userID, limit, callback) {
-        this.queryAPI('/api/get_user_recent', {
+
+    public getRecentPlays(userID, limit): Promise<Object[]> {
+        return this.queryOSUAPI('/api/get_user_recent', {
             u: userID,
             limit: limit
-        }, function(data) {
-            callback(data);
+        }).then(function(data) {
+            return data;
         });
     }
 
-    private getBeatmapsFromCache(connection, beatmapIDs, callback) {
+    private getBeatmapsFromCache(connection, beatmapIDs): Promise<Object[]> {
         let bCollection = connection.collection('osu_beatmaps');
-        bCollection.find({
-            beatmap_id: { $in: beatmapIDs }
-        }).toArray(function(err, docs){
-            callback(docs);
+        return new Promise<Object[]>((resolve, reject) => {
+            bCollection.find({
+                beatmap_id: { $in: beatmapIDs }
+            }).toArray((err, docs) => {
+                resolve(docs);
+            });
         });
     }
 
-    private updateBeatmapCache(connection, beatmapID, beatmapData) {
+    private updateBeatmapCache(connection, beatmapID, beatmapData): Promise<void> {
         let bCollection = connection.collection('osu_beatmaps');
-        bCollection.replaceOne({
-            beatmap_id: beatmapID
-        }, beatmapData, {
-            upsert: true //insert if does not exist
+        return new Promise<void>((resolve, reject) => {
+            bCollection.replaceOne({
+                beatmap_id: beatmapID
+            }, beatmapData, {
+                upsert: true //insert if does not exist
+            });
         });
     }
 
-    public getBeatmaps(beatmapIDs, callback) {
-        MongoClient.connect(config.mongodb_connection, (err, db) => {
-            this.getBeatmapsFromCache(db, beatmapIDs, (data) => {
+    public getBeatmaps(beatmapIDs): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            MongoClient.connect(config.mongodb_connection, (err, db) =>{
+                if (err == null) {
+                    resolve(db);
+                } else {
+                    reject(err);
+                }
+            });
+        }).then((db) => { //connected to db
+            return this.getBeatmapsFromCache(db, beatmapIDs).then((cachedData) => { //cache queried
                 // get missing beatmaps
                 let missing = beatmapIDs.filter((beatmapID) => {
-                    for(let i = 0; i < data.length; i++) {
-                        if (beatmapID == data[i].beatmap_id) { return false; }
+                    for(let i = 0; i < cachedData.length; i++) {
+                        if (beatmapID == (<any>cachedData[i]).beatmap_id) { return false; }
                     }
                     return true;
                 });
-
-                asyncJS.mapSeries(missing, (beatmapID, asyncCallback) => {
-                    this.getBeatmapFromAPI(beatmapID, (data) => {
+                // query for missing beatmaps
+                for(let i = 0; i < missing.length; i++) {
+                    let beatmapID = missing[i];
+                    missing[i] = this.getBeatmapFromAPI(beatmapID).then((data) => {
+                        // add to cache
                         this.updateBeatmapCache(db, beatmapID, data);
-                        asyncCallback(null, data);
-                    })
-                }, (err, missingData) => {
-                    let resultData = data.concat(missingData);
+                        return data;
+                    });
+                }
+                // gather and return full result set
+                return Promise.all(missing).then((missingData) => {
+                    let resultData = cachedData.concat(missingData);
                     let result = { };
                     for(let i = 0; i < resultData.length; i++) {
                         if (resultData[i] == null) { continue; }
-                        result[resultData[i].beatmap_id] = resultData[i];
+                        result[(<any>resultData[i]).beatmap_id] = resultData[i];
                     }  
-                    callback(result);
+                    return result;
                 });
-            })
-
+            });
         });
     }
 }

@@ -3,10 +3,11 @@ import { Router } from 'express';
 
 export class OSURouter {
     service = new OSUDataService();
-    router = new Router();
+    router = Router();
 
     public constructor() {
         this.router.route('/beatmaps').get((req, res) => { this.apiGetBeatmaps(req, res); });
+        this.router.route('/profile/:u').get((req, res) => { this.profilePage(req, res); });
     }
 
     public apiGetBeatmaps(request, response) {
@@ -19,8 +20,13 @@ export class OSURouter {
             beatmaps = [request.query.b];
         }
 
-        this.service.getBeatmaps(beatmaps, function(data) {
-            response.send(data);
+        this.service.getBeatmaps(beatmaps).then((data) => {
+            response.send(JSON.stringify(data));
+        }).catch((error) =>{ 
+            console.log(error);
+            response.send('[]');
+         });
+    }
         });
     }
 }

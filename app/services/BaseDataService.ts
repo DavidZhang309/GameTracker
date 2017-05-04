@@ -2,7 +2,7 @@ import * as http from 'https';
 import * as https from 'https';
 
 export abstract class BaseDataService {
-    public abstract getAPIHost();
+    protected abstract getAPIHost();
 
     /**
      * Queries the specified API using args.
@@ -11,7 +11,7 @@ export abstract class BaseDataService {
      * @param args The query arguments
      * @param secure Is the api secure
      */
-    public queryAPI(path, secure: boolean): Promise<string> {
+    protected queryAPI(path, secure: boolean): Promise<string> {
         let getFn = secure ? https.get : http.get;
         return new Promise<string>((resolve, reject) => {
             getFn({
