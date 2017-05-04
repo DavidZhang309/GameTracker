@@ -12,7 +12,8 @@ import * as exprhandlebars from 'express-handlebars';
 let app = express();
 app.engine('handlebars', exprhandlebars({
     defaultLayout: 'main',
-    layoutsDir: './app/templates/layouts/' 
+    layoutsDir: './app/templates/layouts/',
+    partialsDir: './app/templates/partials/'
 }));
 app.set('views', './app/templates');
 app.set('view engine', 'handlebars');
