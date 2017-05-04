@@ -10,7 +10,7 @@ var MongoClient = mongodb.MongoClient;
 //TODO: handle error cases
 export class OSUDataService extends BaseDataService {
     public getAPIHost() {
-        return "osu.ppy.sh";
+        return config.osu_api_host;
     }
 
     protected queryOSUAPI(api: string, args: object): Promise<Object[]> {
@@ -21,7 +21,7 @@ export class OSUDataService extends BaseDataService {
             path += '&' + q;
         }
         // query
-        return super.queryAPI(path, true).then((data) => {
+        return super.queryAPI(path, config.osu_api_issecure).then((data) => {
             return JSON.parse(data); 
         });
     }
