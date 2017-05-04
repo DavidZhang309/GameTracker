@@ -1,3 +1,8 @@
+// for missing Promises support
+if (global.Promise == null) {
+    global.Promise = require('promise');
+}
+
 //lib
 import { OSURouter } from './middleware/OSURouter'
 var express = require('express');

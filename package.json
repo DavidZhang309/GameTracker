@@ -19,5 +19,6 @@
     "grunt-contrib-sass": "^1.0.0",
     "mongodb": "^2.2.26",
     "typescript": "^2.3.2"
+    "promise": "^7.1.1",
   }
 }
