@@ -6,13 +6,13 @@ module.exports = function(grunt) {
                 cwd: 'app',
                 src: '**/*.json',
                 dest: 'build/'
-            },
-            templates: {
-                expand: true,
-                cwd: 'app',
-                src: 'templates/**/*.handlebars',
-                dest: 'build/'
-            }
+            }//,
+            // templates: {
+            //     expand: true,
+            //     cwd: 'app',
+            //     src: 'templates/**/*.handlebars',
+            //     dest: 'build/'
+            // }
         },
         sass: {
             dist: {
@@ -20,9 +20,20 @@ module.exports = function(grunt) {
                     'build/client/site.css': 'app/client/sass/site.scss'
                 }
             }
+        },
+        watch: {
+            styles: {
+                files: ['app/client/sass/**.scss'],
+                tasks: ['sass'],
+                options: {
+
+                }
+            }
         }
     });
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-sass');
+    grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.registerTask('default', ['copy', 'sass']);
+    grunt.registerTask('dev', ['copy', 'sass', 'watch']);
 }
