@@ -7,7 +7,7 @@ export class OSURouter {
 
     public constructor() {
         this.router.route('/beatmaps').get((req, res) => { this.apiGetBeatmaps(req, res); });
-        this.router.route('/profile/:u').get((req, res) => { this.profilePage(req, res); });
+        //this.router.route('/profile/:u').get((req, res) => { this.profilePage(req, res); });
     }
 
     public apiGetBeatmaps(request, response) {
