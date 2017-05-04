@@ -18,7 +18,7 @@
     "grunt-contrib-sass": "^1.0.0",
     "mongodb": "^2.2.26",
     "promise": "^7.1.1",
-    "typescript": "^2.3.2",
+    "typescript": "^2.3.2"
   },
   "devDependencies": {
     "@types/node": "^7.0.14",

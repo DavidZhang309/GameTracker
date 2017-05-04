@@ -27,6 +27,4 @@ export class OSURouter {
             response.send('[]');
          });
     }
-        });
-    }
 }
