@@ -15,5 +15,9 @@
     "build/client/bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "dependencies": {
+    "html5-boilerplate": "^5.3.0",
+    "bootstrap": "^3.3.7"
+  }
 }

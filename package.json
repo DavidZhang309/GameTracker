@@ -9,7 +9,6 @@
   "author": "David Zhang",
   "license": "MIT",
   "dependencies": {
-    "@types/node": "^7.0.14",
     "async": "^2.4.0",
     "bower": "^1.8.0",
     "express": "^4.15.2",
@@ -18,7 +17,12 @@
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-sass": "^1.0.0",
     "mongodb": "^2.2.26",
-    "typescript": "^2.3.2"
     "promise": "^7.1.1",
+    "typescript": "^2.3.2",
+  },
+  "devDependencies": {
+    "@types/node": "^7.0.14",
+    "@types/es6-promise": "0.0.32",
+    "@types/express": "^4.0.35"
   }
 }
