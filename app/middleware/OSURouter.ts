@@ -1,7 +1,8 @@
-import { OSUDataService } from '../services/OSUDataService';
 import { Router } from 'express';
+import { IServiceRouter } from './IServiceRouter';
+import { OSUDataService } from '../services/OSUDataService';
 
-export class OSURouter {
+export class OSURouter implements IServiceRouter {
     service = new OSUDataService();
     router = Router();
 
