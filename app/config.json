@@ -1,5 +1,9 @@
 {
+    "osu_api_host": "osu.ppy.sh",
+    "osu_api_issecure": true,
     "osu_mockapi_dir": "data/osu/",
     "osu_api_key": "",
+    "steam_api_host": "api.steampowered.com",
+    "steam_api_key": "",
     "mongodb_connection": "mongodb://localhost:27017/gametracker"
 }
