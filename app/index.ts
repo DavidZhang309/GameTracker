@@ -13,7 +13,13 @@ let app = express();
 app.engine('handlebars', exprhandlebars({
     defaultLayout: 'main',
     layoutsDir: './app/templates/layouts/',
-    partialsDir: './app/templates/partials/'
+    partialsDir: './app/templates/partials/',
+    helpers: {
+        footer_script: function(options) {
+            this._footer_scripts = options.fn(this);
+            return null;
+        }
+    }
 }));
 app.set('views', './app/templates');
 app.set('view engine', 'handlebars');
