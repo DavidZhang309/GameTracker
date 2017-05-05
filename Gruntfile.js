@@ -29,11 +29,26 @@ module.exports = function(grunt) {
 
                 }
             }
+        },
+        ts: {
+            app: {
+                src: ['app/**/*.ts', '!app/client/**'],
+                dest: 'build/'
+            },
+            site: {
+                src: ['app/client/ts/**/*.ts'],
+                dest: 'build/client/site.js',
+                options: {
+                    module: 'amd'
+                }
+            }
         }
     });
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.registerTask('default', ['copy', 'sass']);
-    grunt.registerTask('dev', ['copy', 'sass', 'watch']);
+    grunt.loadNpmTasks('grunt-ts');
+
+    grunt.registerTask('default', ['copy', 'sass', 'ts']);
+    grunt.registerTask('dev', ['copy', 'sass', 'ts', 'watch']);
 }

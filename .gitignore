@@ -19,6 +19,9 @@ coverage
 
 # Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
 .grunt
+.sass-cache
+.tscache
+app/.baseDir.ts
 
 # node-waf configuration
 .lock-wscript
@@ -38,6 +41,3 @@ jspm_packages
 
 # build directory
 build
-
-# cache
-.sass-cache
