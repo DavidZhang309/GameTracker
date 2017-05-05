@@ -131,3 +131,54 @@ export class OSUDataService extends BaseDataService {
         });
     }
 }
+
+export interface IOSUUser {
+    user_id: string;
+    username: string;
+    count300: string;
+    count100: string;
+    count50: string;
+    playcount: string;
+    ranked_score: string;
+    total_score: string;
+    pp_rank: string;
+    level: string;
+    pp_raw: string;
+    accuracy: string;
+    count_rank_ss: string;
+    count_rank_s: string;
+    count_rank_a: string;
+    country: string;
+    pp_country_rank: string;
+    events: any[];
+}
+
+export interface IBeatmap {
+    approved: string;
+    approved_date: string;
+    last_update: string;
+    artist: string;
+    beatmap_id: string;
+    beatmapset_id: string;
+    bpm: string;
+    creator: string;
+    difficultyrating: string;
+    diff_size: string;
+    diff_overall: string;
+    diff_approach: string;
+    diff_drain: string;
+    hit_length: string;
+    source: string;
+    genre_id: string;
+    language_id: string;
+    title: string;
+    total_length: string;
+    version: string;
+    file_md5: string;
+    mode: string;
+    tags: string;
+    favourite_count: string;
+    playcount: string;
+    passcount: string;
+    max_combo: string;
+}
