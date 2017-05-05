@@ -28,6 +28,10 @@ module.exports = function(grunt) {
                 options: {
 
                 }
+            },
+            scripts: {
+                files: ['app/client/ts/**/*.ts'],
+                tasks: ['ts:site']
             }
         },
         ts: {
