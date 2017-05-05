@@ -1,0 +1,7 @@
+.div-entry {
+    padding: 5px;
+}
+
+.div-entry:not(:last-child) {
+    border-bottom: 1px solid #aaa;
+}
