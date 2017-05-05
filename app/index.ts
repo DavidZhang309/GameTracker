@@ -31,7 +31,16 @@ app.use('/osu', osuRouter.router);
 app.use('/steam', steamRouter.router);
 app.get('/', (request, response) => {
     response.render('pages/home');
-})
+});
+app.get('/profile', (request, response) => {
+        response.render('pages/profile_search');
+});
+app.get('/profile/:id', (request, response) => {
+    let user_id = request.params['id'];
+    response.render('pages/profile', { entries: [
+        {a:1}, {a:2}, {a:3}
+    ]});
+});
 app.use('/', express.static('./build/client'));
 
 app.listen(5590, function(){
