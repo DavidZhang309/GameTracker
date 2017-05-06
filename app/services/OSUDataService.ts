@@ -90,7 +90,7 @@ export class OSUDataService extends BaseDataService {
         });
     }
 
-    public getBeatmaps(beatmapIDs): Promise<any> {
+    public getBeatmaps(beatmapIDs: number[]): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             MongoClient.connect(config.mongodb_connection, (err, db) =>{
                 if (err == null) {
@@ -108,17 +108,18 @@ export class OSUDataService extends BaseDataService {
                     }
                     return true;
                 });
+
+                let missingQuery = [];
                 // query for missing beatmaps
                 for(let i = 0; i < missing.length; i++) {
-                    let beatmapID = missing[i];
-                    missing[i] = this.getBeatmapFromAPI(beatmapID).then((data) => {
+                    missingQuery.push(this.getBeatmapFromAPI(missing[i]).then((data) => {
                         // add to cache
-                        this.updateBeatmapCache(db, beatmapID, data);
+                        this.updateBeatmapCache(db, (<any>data).beatmap_id, data);
                         return data;
-                    });
+                    }));
                 }
                 // gather and return full result set
-                return Promise.all(missing).then((missingData) => {
+                return Promise.all(missingQuery).then((missingData) => {
                     let resultData = cachedData.concat(missingData);
                     let result = { };
                     for(let i = 0; i < resultData.length; i++) {
