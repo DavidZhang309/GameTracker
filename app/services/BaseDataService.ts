@@ -29,7 +29,7 @@ export abstract class BaseDataService {
                 path: path
             }, (response) => {
                 //check if successfull
-                let success = response.statusCode != 200;
+                let success = response.statusCode == 200;
                 let chunks = [];
                 //gather response
                 response.on('data', (chunk) => { chunks.push(chunk); });
