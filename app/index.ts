@@ -18,6 +18,9 @@ app.engine('handlebars', exprhandlebars({
         footer_script: function(options) {
             this._footer_scripts = options.fn(this);
             return null;
+        },
+        round_number: function(num: string, amount: any) {
+            return parseFloat(num).toFixed(parseInt(amount));
         }
     }
 }));
