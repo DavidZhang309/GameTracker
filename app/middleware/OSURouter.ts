@@ -106,7 +106,7 @@ export class OSURouter implements IServiceRouter {
                 })
             }
 
-            response.render('osu/osu_profile', {
+            response.render('pages/osu/osu_profile', {
                 user_info: user_info,
                 top_performances: top_perf_view,
                 recent_plays: recent_plays_view
