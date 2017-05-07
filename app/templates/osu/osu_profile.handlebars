@@ -1,0 +1,61 @@
+<audio id="preview-player"></audio>
+<main id="osu-profile" class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">Profile</div>
+        <div class="panel-body">
+            <h3><a href="https://osu.ppy.sh/u/{{user_info.user_id}}">{{user_info.username}}</a>
+                [{{user_info.pp_rank}}][{{user_info.country}}: {{user_info.pp_country_rank}}]
+            </h3>
+            <p>
+                <div>PP: {{user_info.pp_raw}}</div>
+                <div>Accuracy: {{user_info.accuracy}}%</div>
+                <div>Ranks (SS/S/A): {{user_info.count_rank_ss}} / {{user_info.count_rank_s}} / {{user_info.count_rank_a}}</div>
+            </p>
+            <p>
+                <div>Play count: {{user_info.playcount}}</div>
+                <div>Level: {{user_info.level}}</div>
+                <div>Hit count (300/100/50): {{user_info.count300}} / {{user_info.count100}} / {{user_info.count50}}</div>
+            </p>
+        </div>
+        
+        <div class="panel-heading" data-toggle="collapse" data-target="#perf">Performance</div>
+        <div id="perf" class="panel-body collapse in">
+            {{!--<h3>Aggregate information of the top  performances </h3>--}}
+            <h3>Top  performances</h3>
+            {{#each top_performances}}
+                {{>osu/top_perf}}
+            {{/each}}
+        </div>
+
+        <div class="panel-heading" data-toggle="collapse" data-target="#recent">Recent</div>
+        <div id="recent" class="panel-body collapse">
+            {{#each recent_plays}}
+                {{>osu/recent}}
+            {{/each}}
+        </div>
+    </div>
+</main>
+
+{{#footer_script}}
+<script>
+    var player = document.getElementById('preview-player');
+    player.addEventListener('ended', () => {
+        $('.playing').removeClass('playing');
+    });
+
+    $(document).on('click', '.preview', function() {
+        var $this = $(this);
+
+        if ($this.hasClass('playing')) {
+            $this.removeClass('playing');
+            player.pause();
+        } else {
+            $('.playing').removeClass('playing');
+            $this.addClass('playing');
+            player.innerHTML = '<source src="https://b.ppy.sh/preview/'+ $this.attr('data-beatmapset-id') + '.mp3">';
+            player.load();
+            player.play();	
+        }
+    });
+</script>
+{{/footer_script}}

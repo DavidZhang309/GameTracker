@@ -1,0 +1,22 @@
+<div class="div-entry">
+    <div class="row">
+        <div class="col-xs-12 col-sm-8">
+            <img class="preview" src="https://b.ppy.sh/thumb/{{beatmap_info.beatmapset_id}}.jpg" data-beatmapset-id="{{beatmap_info.beatmapset_id}}">
+            <div class="beatmap-info">
+                <div>
+                    <a href="https://osu.ppy.sh/b/{{beatmap_info.beatmap_id}}">
+                        {{beatmap_info.artist}} - {{beatmap_info.title}}
+                    </a> [{{beatmap_info.version}}]
+                </div>
+                <div>
+                    Base: [<b>{{round_number beatmap_info.difficultyrating 2}}</b>] CS: {{beatmap_info.diff_size}} AR: {{beatmap_info.diff_approach}} OD: {{beatmap_info.diff_overall}} HP: {{beatmap_info.diff_drain}} BPM: {{beatmap_info.bpm}} ({{custom_info.time}})
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-4 col-sm-2">
+            {{play_info.score}}
+        </div>
+        <div class="col-xs-4 col-sm-2">
+        </div>
+    </div>
+</div>

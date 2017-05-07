@@ -5,3 +5,13 @@
 .div-entry:not(:last-child) {
     border-bottom: 1px solid #aaa;
 }
+
+#osu-profile {
+    .beatmap-info {
+        display: inline-block;
+    }
+
+    .pp-entry {
+        text-align: right;
+    }
+}

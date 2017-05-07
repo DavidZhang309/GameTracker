@@ -1,0 +1,27 @@
+<div class="div-entry">
+    <div class="row">
+        <div class="col-xs-12 col-sm-8">
+            <img class="preview" src="https://b.ppy.sh/thumb/{{beatmap_info.beatmapset_id}}.jpg" data-beatmapset-id="{{beatmap_info.beatmapset_id}}">
+            <div class="beatmap-info">
+                <div>
+                    <a href="https://osu.ppy.sh/b/{{beatmap_info.beatmap_id}}">
+                        {{beatmap_info.artist}} - {{beatmap_info.title}}
+                    </a> [{{beatmap_info.version}}] ({{custom_info.time_str}})
+                </div>
+                <div>
+                    Base: [<b>{{round_number beatmap_info.difficultyrating 2}}</b>] CS: {{beatmap_info.diff_size}} AR: {{beatmap_info.diff_approach}} OD: {{beatmap_info.diff_overall}} HP: {{beatmap_info.diff_drain}} BPM: {{beatmap_info.bpm}}
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-4 col-sm-2">
+            <div>[<b>{{perf_info.rank}}</b>][{{round_number custom_info.acc 2}}%]{{perf_info.score}}</div>
+		    <div>{{perf_info.maxcombo}}x / {{beatmap_info.max_combo}}x ({{{custom_info.fc_percent_html}}})</div>
+		    {{!--<div>{{perf_info.hit300 ?> / <?= $entry['hit_count'][1] ?> / <?= $entry['hit_count'][2] ?> / <?= $entry['hit_count'][3] ?></div>--}}
+            <div>{{perf_info.count300}} / {{perf_info.count100}} / {{perf_info.count50}} / {{perf_info.countmiss}}</div>
+        </div>
+        <div class="col-xs-4 col-sm-2 pp-entry">
+            <div>{{perf_info.pp}}PP</div>
+            <div>{{custom_info.weighting_percent}}% = {{custom_info.weighted_pp}}PP</div>
+        </div>
+    </div>
+</div>
