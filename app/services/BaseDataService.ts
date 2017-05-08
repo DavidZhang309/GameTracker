@@ -1,5 +1,8 @@
 import * as http from 'https';
 import * as https from 'https';
+import { MongoClient, Db } from 'mongodb';
+
+var config = require('../config.json');
 
 export abstract class BaseDataService {
     /**
@@ -8,6 +11,15 @@ export abstract class BaseDataService {
      * @return hostname the hostname of server
      */
     protected abstract getAPIHost(): string;
+
+    protected connectToDB(): Promise<Db>  {
+        return new Promise((resolve, reject) => {
+            MongoClient.connect(config.mongodb_connection, (err, db: Db) => {
+                if (err) { reject(err) }
+                else { resolve(db) }
+            })
+        })
+    }
 
     /**
      * Queries the specified url path.
