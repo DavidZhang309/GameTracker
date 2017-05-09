@@ -41,17 +41,21 @@
     var player = document.getElementById('preview-player');
     player.addEventListener('ended', () => {
         $('.playing').removeClass('playing');
+        $('.preview .fa').removeClass('fa-pause').addClass('fa-play');
     });
 
     $(document).on('click', '.preview', function() {
         var $this = $(this);
 
         if ($this.hasClass('playing')) {
+            $this.find('.fa').removeClass('fa-pause').addClass('fa-play');
             $this.removeClass('playing');
             player.pause();
         } else {
             $('.playing').removeClass('playing');
+            $('.preview .fa').removeClass('fa-pause').addClass('fa-play');
             $this.addClass('playing');
+            $this.find('.fa').removeClass('fa-play').addClass('fa-pause');
             player.innerHTML = '<source src="https://b.ppy.sh/preview/'+ $this.attr('data-beatmapset-id') + '.mp3">';
             player.load();
             player.play();	

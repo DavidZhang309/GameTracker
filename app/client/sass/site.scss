@@ -1,7 +1,6 @@
 .div-entry {
     padding: 5px;
 }
-
 .div-entry:not(:last-child) {
     border-bottom: 1px solid #aaa;
 }
@@ -13,5 +12,35 @@
 
     .pp-entry {
         text-align: right;
+    }
+
+    .preview, .panel-heading {
+        cursor: pointer;
+    }
+
+    .preview {
+        position: relative;
+        width: 80px;
+        height: 60px;
+        display: inline-block;
+    }
+    .preview-hover {
+        position: absolute;
+        top: 0;
+        width: 80px;
+        height: 60px;
+        text-align: center;
+    }
+
+    .preview-hover .fa {
+        display: none;
+        font-size: 40px;
+        line-height: 60px;
+        color: #ccc;
+        opacity: .90;
+
+    }
+    .preview-hover:hover .fa {
+        display: inline-block;
     }
 }
