@@ -26,7 +26,9 @@ export class TrackerRouter implements IServiceRouter {
         }
         
         this.service.getItem(filter).then((docs) => {
-            response.send(docs);
+            response.send({
+                result: docs
+            });
         }).catch((err) => {
             next(err);  
         })
