@@ -4,10 +4,9 @@ if (global.Promise == null) {
 }
 
 //lib
-import { OSURouter } from './middleware/OSURouter';
-import { SteamRouter } from './middleware/SteamRouter';
 import * as express from 'express';
 import * as exprhandlebars from 'express-handlebars';
+import * as config from './config';
 
 let app = express();
 app.engine('handlebars', exprhandlebars({
@@ -27,23 +26,9 @@ app.engine('handlebars', exprhandlebars({
 app.set('views', './app/templates');
 app.set('view engine', 'handlebars');
 
-let osuRouter = new OSURouter();
-let steamRouter = new SteamRouter();
-
-app.use('/osu', osuRouter.router);
-app.use('/steam', steamRouter.router);
-app.get('/', (request, response) => {
-    response.render('pages/home');
-});
-app.get('/profile', (request, response) => {
-        response.render('pages/profile_search');
-});
-app.get('/profile/:id', (request, response) => {
-    let user_id = request.params['id'];
-    response.render('pages/profile', { entries: [
-        {a:1}, {a:2}, {a:3}
-    ]});
-});
+Object.keys(config.services).forEach((path) => {
+    app.use(path, config.services[path].router)
+})
 app.use('/', express.static('./build/client'));
 
 app.listen(5590, function(){
