@@ -4,7 +4,7 @@ import { SteamRouter } from './middleware/SteamRouter';
 import { OSURouter } from './middleware/OSURouter';
 
 export const services = {
-    '/osu': OSURouter,
-    '/steam': SteamRouter,
-    '/': TrackerRouter
+    '/osu': new OSURouter(),
+    '/steam': new SteamRouter(),
+    '/': new TrackerRouter()
 }
