@@ -9,7 +9,8 @@ export class TrackerRouter implements IServiceRouter {
     public constructor() {
         this.router.get('/', (request, response) => { this.pageOverview(request, response); });
 
-        this.router.route('/api/item/:item')
+        this.router.get('/api/item/search', (request, response, next) => { (<any>request).is_api = true; this.apiGetItem(request, response, next); });
+        this.router.route('/api/item/:id')
             .get((request, response, next) => { (<any>request).is_api = true; this.apiGetItem(request, response, next); })
             .put((request, response, next) => { (<any>request).is_api = true; this.apiAddItem(request, response, next); });
     }
@@ -41,6 +42,7 @@ export class TrackerRouter implements IServiceRouter {
         
         try {
             let id = parseInt(request.query['id']);
+            data['id'] = id;
             //TODO: add properties
 
             if (id == NaN) { throw 'bad arg'; }
