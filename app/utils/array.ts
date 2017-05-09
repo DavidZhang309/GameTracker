@@ -1,5 +1,5 @@
 /**
- * Makes an array dinstinct and sorted(side effect)
+ * Makes an array distinct and sorted(side effect)
  * @param array The array being processed
  * 
  * @returns An array of distinct values
