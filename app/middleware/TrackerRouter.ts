@@ -8,8 +8,10 @@ export class TrackerRouter implements IServiceRouter {
 
     public constructor() {
         this.router.get('/', (request, response) => { this.pageOverview(request, response); });
-        this.router.get('/api/item', (request, response, next) => { (<any>request).is_api = true; this.apiGetItem(request, response, next); });
-        //this.router.put('/api/item/:item', (request, response) => { this.apiAddItem(request, response); });
+
+        this.router.route('/api/item/:item')
+            .get((request, response, next) => { (<any>request).is_api = true; this.apiGetItem(request, response, next); })
+            .put((request, response, next) => { (<any>request).is_api = true; this.apiAddItem(request, response, next); });
     }
 
     protected apiGetItem(request: Request, response: Response, next: NextFunction) {
@@ -30,9 +32,26 @@ export class TrackerRouter implements IServiceRouter {
         })
     }
 
-    // protected apiAddItem(request: Request, response: Response) {
+    protected apiAddItem(request: Request, response: Response, next: NextFunction) {
+        let data = { //mongodb format
+            $currentdate: { date_added: true }
+        }
+        
+        try {
+            let id = parseInt(request.query['id']);
+            //TODO: add properties
 
-    // }
+            if (id == NaN) { throw 'bad arg'; }
+        } catch (err) {
+            response.send({ error: 'bad arguments' });
+        }
+
+        this.service.updateItem(data).then(() => {
+            response.send({ });
+        }).catch((err) => { 
+            next(err);
+        });
+    }
 
     protected pageOverview(request, response) {
         response.render('pages/tracker/overview', { });
