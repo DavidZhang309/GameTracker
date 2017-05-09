@@ -24,7 +24,8 @@ export class TrackerDataService extends BaseDataService {
         } else {
             return db.collection('tracker_items').updateOne(
                 { item_id: itemData.item_id }, 
-                itemData
+                itemData, 
+                { upsert: true }
             );
         }
     }
