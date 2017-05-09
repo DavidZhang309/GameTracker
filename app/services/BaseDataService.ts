@@ -12,15 +12,6 @@ export abstract class BaseDataService {
      */
     protected abstract getAPIHost(): string;
 
-    protected connectToDB(): Promise<Db>  {
-        return new Promise((resolve, reject) => {
-            MongoClient.connect(config.mongodb_connection, (err, db: Db) => {
-                if (err) { reject(err) }
-                else { resolve(db) }
-            })
-        })
-    }
-
     /**
      * Queries the specified url path.
      * 
@@ -62,5 +53,19 @@ export abstract class BaseDataService {
                 })
             });
         });
+    }
+
+    /**
+     * Connects to DB with promise
+     * 
+     * @returns A promise of a db connection
+     */
+    protected connectToDB(): Promise<Db>  {
+        return new Promise((resolve, reject) => {
+            MongoClient.connect(config.mongodb_connection, (err, db: Db) => {
+                if (err) { reject(err) }
+                else { resolve(db) }
+            })
+        })
     }
 }
