@@ -1,12 +1,14 @@
 <div class="div-entry">
     <div class="row">
         <div class="col-xs-12 col-sm-8">
+            {{#unless @root.text_only}}
             <div class="preview" data-beatmapset-id="{{beatmap_info.beatmapset_id}}">
                 <div class="preview-hover">
                     <i class="fa fa-play"></i>
                 </div>
                 <img src="https://b.ppy.sh/thumb/{{beatmap_info.beatmapset_id}}.jpg">
             </div>
+            {{/unless}}
             <div class="beatmap-info">
                 <div>
                     <a href="https://osu.ppy.sh/b/{{beatmap_info.beatmap_id}}">
