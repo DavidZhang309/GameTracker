@@ -1,18 +1,23 @@
 $color1: rgba(190, 233, 232, 1);
 $color2: rgba(98, 182, 203, 1);
-$mainBG: rgba(27, 73, 101, 1);
-$inverseTextColor: rgba(202, 233, 255, 1);
-$secondaryBG: rgba(95, 168, 211, 1);
+$main_dark: rgba(27, 73, 101, 1);
+$light_text: rgba(202, 233, 255, 1);
+$main_bg: rgba(95, 168, 211, 1);
 
 .theme-default {
     body {
-        background-color: $secondaryBG;
+        background-color: $main_bg;
     }
 
     nav.navbar {
-        background-color: $mainBG;
+        background-color: $main_dark;
         a {
-            color: $inverseTextColor;
+            color: $light_text;
+        }
+
+        a:hover {
+            background-color: $color1;
+            color: $main_dark;
         }
     }
 
@@ -20,16 +25,16 @@ $secondaryBG: rgba(95, 168, 211, 1);
         //temp: better than default
         border: none;
 
-        // border-color: $mainBG;
+        // border-color: $main_dark;
     }
     .panel-heading {
-        background-color: $mainBG;
-        color: $inverseTextColor;
+        background-color: $main_dark;
+        color: $light_text;
         border-radius: 0px;
     }
 
     footer {
-        background-color: $mainBG;
+        background-color: $main_dark;
         padding: 5px;
     }
 }
@@ -39,7 +44,7 @@ $secondaryBG: rgba(95, 168, 211, 1);
     padding: 5px;
 }
 .div-entry:not(:last-child) {
-    border-bottom: 1px solid $mainBG;
+    border-bottom: 1px solid $main_dark;
 }
 
 #osu-profile {
