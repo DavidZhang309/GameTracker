@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { sprintf } from 'sprintf-js';
 import { IServiceRouter } from './IServiceRouter';
 import { OSUDataService } from '../services/OSUDataService';
+import * as ArrayUtil from '../utils/array';
+
 const HITVALUE = [ 300, 100, 50, 0 ];
 
 export class OSURouter implements IServiceRouter {
@@ -58,6 +60,9 @@ export class OSURouter implements IServiceRouter {
             for(let i = 0; i < recent_plays.length; i++) {
                 beatmapIDs.push(recent_plays[i].beatmap_id);
             }
+
+            beatmapIDs = ArrayUtil.distinct(beatmapIDs);
+
             return this.service.getBeatmaps(beatmapIDs);
         }).then((beatmaps) => {
             for(let i = 0; i < top_perf.length; i++) {
