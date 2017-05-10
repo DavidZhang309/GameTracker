@@ -22,6 +22,7 @@ coverage
 .sass-cache
 .tscache
 app/.baseDir.ts
+app/client/angular/.baseDir.ts
 
 # node-waf configuration
 .lock-wscript

@@ -37,13 +37,29 @@ module.exports = function(grunt) {
         ts: {
             app: {
                 src: ['app/**/*.ts', '!app/client/**'],
-                dest: 'build/'
+                dest: 'build/',
+                options: {
+                    lib: [ "es2015" ]
+                }
             },
             site: {
                 src: ['app/client/ts/**/*.ts'],
                 dest: 'build/client/site.js',
                 options: {
                     module: 'amd'
+                }
+            },
+            angular: {
+                src: ['app/client/angular/**/*.ts'],
+                dest: 'build/client/angular',
+                options: {
+                    target: "es5",
+                    module: "umd",
+                    moduleResolution: 'node',
+                    lib: [ "es2015", "dom" ],
+                    sourceMap: true,
+                    emitDecoratorMetadata: true,
+                    experimentalDecorators: true
                 }
             }
         }

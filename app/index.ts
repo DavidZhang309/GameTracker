@@ -30,6 +30,9 @@ app.set('view engine', 'handlebars');
 Object.keys(config.services).forEach((path) => {
     app.use(path, config.services[path].router);
 })
+app.get('/test-app', function(request, response) {
+    response.render('pages/test-app/home', { layout: 'angular_base' });
+})
 app.use('/', express.static('./build/client'));
 app.use('/', function(request, response, next) {
     response.statusCode = 404;
