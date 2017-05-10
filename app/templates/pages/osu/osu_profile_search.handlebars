@@ -1,0 +1,20 @@
+<main class="container">
+    <div class="input-group">
+        <input type="text" id="profile-input" class="form-control">
+        <a id="profile-search" class="btn btn-default">Search</a>
+    </div>
+</main>
+
+{{#footer_script}}
+<script>
+    function gotoProfile(name) {
+        window.location.href = 'profile/' + name;
+    }
+
+    $(document).on('click', '#profile-search', function() {
+        gotoProfile($('#profile-input').val());
+    }).on('submit', '#profile-input', function() {
+        gotoProfile($(this).val);
+    });
+</script>
+{{/footer_script}}

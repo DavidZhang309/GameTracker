@@ -12,6 +12,7 @@ export class OSURouter implements IServiceRouter {
 
     public constructor() {
         this.router.route('/beatmaps').get((req, res) => { this.apiGetBeatmaps(req, res); });
+        this.router.route('/profile/').get((req, res) => { res.render('pages/osu/osu_profile_search'); });
         this.router.route('/profile/:u').get((req, res) => { this.profilePage(req, res, false); });
         this.router.route('/profile/:u/mobile').get((req, res) => { this.profilePage(req, res, true); });
     }
