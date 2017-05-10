@@ -1,11 +1,52 @@
+$color1: rgba(190, 233, 232, 1);
+$color2: rgba(98, 182, 203, 1);
+$mainBG: rgba(27, 73, 101, 1);
+$inverseTextColor: rgba(202, 233, 255, 1);
+$secondaryBG: rgba(95, 168, 211, 1);
+
+.theme-default {
+    body {
+        background-color: $secondaryBG;
+    }
+
+    nav.navbar {
+        background-color: $mainBG;
+        a {
+            color: $inverseTextColor;
+        }
+    }
+
+    .panel {
+        //temp: better than default
+        border: none;
+
+        // border-color: $mainBG;
+    }
+    .panel-heading {
+        background-color: $mainBG;
+        color: $inverseTextColor;
+        border-radius: 0px;
+    }
+
+    footer {
+        background-color: $mainBG;
+        padding: 5px;
+    }
+}
+
+
 .div-entry {
     padding: 5px;
 }
 .div-entry:not(:last-child) {
-    border-bottom: 1px solid #aaa;
+    border-bottom: 1px solid $mainBG;
 }
 
 #osu-profile {
+    // .panel {
+    //     background-color: $color1;
+    // }
+
     .beatmap-info {
         display: inline-block;
     }
