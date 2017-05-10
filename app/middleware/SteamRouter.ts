@@ -5,4 +5,5 @@ import { SteamDataService } from '../services/SteamDataService';
 export class SteamRouter implements IServiceRouter {
     service = new SteamDataService();
     router = Router();
+    liteRender: boolean;
 }

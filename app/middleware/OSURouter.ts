@@ -9,12 +9,14 @@ const HITVALUE = [ 300, 100, 50, 0 ];
 export class OSURouter implements IServiceRouter {
     service = new OSUDataService();
     router = Router();
+    liteRender: boolean;
 
-    public constructor() {
+    public constructor(lite: boolean) {
+        this.liteRender = lite;
+
         this.router.route('/beatmaps').get((req, res) => { this.apiGetBeatmaps(req, res); });
         this.router.route('/profile/').get((req, res) => { res.render('pages/osu/osu_profile_search'); });
-        this.router.route('/profile/:u').get((req, res) => { this.profilePage(req, res, false); });
-        this.router.route('/profile/:u/mobile').get((req, res) => { this.profilePage(req, res, true); });
+        this.router.route('/profile/:u').get((req, res) => { this.profilePage(req, res); });
     }
 
     public apiGetBeatmaps(request, response) {
@@ -34,9 +36,9 @@ export class OSURouter implements IServiceRouter {
             response.send('[]');
          });
     }
-    
+
     // server-sided pages
-    public profilePage(request, response, textOnly: boolean) {
+    public profilePage(request, response) {
         let userID = request.params['u'];
         
         let user_info;
@@ -117,7 +119,7 @@ export class OSURouter implements IServiceRouter {
                 user_info: user_info,
                 top_performances: top_perf_view,
                 recent_plays: recent_plays_view,
-                text_only: textOnly
+                text_only: this.liteRender
             });
         }).catch((error) => {
             console.log(error);

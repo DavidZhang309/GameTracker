@@ -5,8 +5,11 @@ import { IServiceRouter } from './IServiceRouter';
 export class TrackerRouter implements IServiceRouter {
     service = new TrackerDataService();
     router = Router();
+    liteRender: boolean;
 
-    public constructor() {
+    public constructor(lite: boolean) {
+        this.liteRender = lite;
+        
         this.router.get('/', (request, response) => { this.pageOverview(request, response); });
 
         this.router.get('/api/item/search', (request, response, next) => { (<any>request).is_api = true; this.apiGetItem(request, response, next); });
