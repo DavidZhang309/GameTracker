@@ -16,7 +16,7 @@ export class OSURouter implements IServiceRouter {
 
         this.router.route('/beatmaps').get((req, res) => { this.apiGetBeatmaps(req, res); });
         this.router.route('/profile/').get((req, res) => { res.render('pages/osu/osu_profile_search'); });
-        this.router.route('/profile/:u').get((req, res) => { this.profilePage(req, res); });
+        this.router.route('/profile/:u').get((req, res, next) => { this.profilePage(req, res, next); });
     }
 
     public apiGetBeatmaps(request, response) {
@@ -38,7 +38,7 @@ export class OSURouter implements IServiceRouter {
     }
 
     // server-sided pages
-    public profilePage(request, response) {
+    public profilePage(request, response, next) {
         let userID = request.params['u'];
         
         let user_info;
@@ -126,6 +126,7 @@ export class OSURouter implements IServiceRouter {
             response.render("pages/500", {
                 error: error
             });
+            next(error);
         });
     }
 }
