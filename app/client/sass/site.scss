@@ -90,3 +90,14 @@ $main_bg: rgba(95, 168, 211, 1);
         display: inline-block;
     }
 }
+
+
+#auth-login {
+    .login-options {
+        margin-top: 10px;
+
+        .register-option {
+            float: right;
+        }
+    }
+}
