@@ -6,13 +6,11 @@ if (global.Promise == null) {
 //lib
 import { Router, Request, Response } from 'express';
 import * as express from 'express';
+import * as express_parser from 'body-parser';
+import * as express_session from 'express-session';
 import * as exprhandlebars from 'express-handlebars';
-import * as config from './config';
-
-//temp
 import * as passport from 'passport';
-import * as passport_local from 'passport-local';
-let LocalStrategy = passport_local.Strategy;
+import * as config from './config';
 
 let app = express();
 // Template engine configuration
@@ -33,24 +31,14 @@ app.engine('handlebars', exprhandlebars({
 app.set('views', './app/templates');
 app.set('view engine', 'handlebars');
 
+app.use(express_parser.json());
+app.use(express_parser.urlencoded());
+app.use(express_session({
+    secret: 'much secret'
+}));
+
 // routing authentication
 app.use(passport.initialize());
-passport.use(new LocalStrategy({
-        usernameField: 'email',
-        passwordField: 'passw'
-    }, function(user, pass, done) {
-        done(null, false, { message: "Not possible to authenticate" });
-    }
-));
-app.get('/auth/login', (request, response) => {
-    response.render('pages/auth/login', { });
-});
-app.post('/auth/api/login', passport.authenticate('local', { 
-        failureRedirect: '/auth/login'
-    }), (request, response) => {
-        response.redirect('/');
-    }
-);
 
 // routing services
 Object.keys(config.services).forEach((path) => {

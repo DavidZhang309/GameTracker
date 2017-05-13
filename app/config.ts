@@ -1,4 +1,5 @@
 import { IServiceRouter } from './middleware/IServiceRouter';
+import { AuthRouter } from './middleware/AuthRouter';
 import { TrackerRouter } from './middleware/TrackerRouter';
 import { SteamRouter } from './middleware/SteamRouter';
 import { OSURouter } from './middleware/OSURouter';
@@ -6,9 +7,11 @@ import { OSURouter } from './middleware/OSURouter';
 export const services = {
     '/m/osu': new OSURouter(true),
     '/m/steam': new SteamRouter(),
+    '/m/auth': new AuthRouter(true),
     '/m/': new TrackerRouter(true),
     '/osu': new OSURouter(false),
     '/steam': new SteamRouter(),
+    '/auth': new AuthRouter(false),
     '/': new TrackerRouter(false)
 }
 

@@ -26,12 +26,12 @@
                     <ul class="nav navbar-nav">
                         {{>navbar_link active=false link="/" text="Tracker" }}
                         {{>navbar_link active=false link="/steam" text="Steam"}}
-                        {{>navbar_link active=false link="/osu" text="OSU!"}}
+                        {{>navbar_link active=false link="/osu" text="osu!"}}
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li>
-                            {{#if logged_in }}<a>Logout</a>{{/if}}
-                            {{#unless logged_in }}<a>Login</a>{{/unless}}
+                            {{#if logged_in }}<a href="/auth/logout">Logout</a>{{/if}}
+                            {{#unless logged_in }}<a href="/auth/login">Login</a>{{/unless}}
                         </li>
                     </ul>
                 </div>
