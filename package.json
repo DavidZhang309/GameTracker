@@ -30,6 +30,7 @@
     "express-session": "^1.15.2",
     "mongodb": "^2.2.26",
     "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
     "promise": "^7.1.1",
     "rxjs": "^5.4.0",
     "sprintf-js": "^1.1.0",
