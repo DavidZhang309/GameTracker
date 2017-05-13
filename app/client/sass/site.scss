@@ -101,3 +101,13 @@ $main_bg: rgba(95, 168, 211, 1);
         }
     }
 }
+
+#error-page {
+    .error {
+        background-color: $light_text;
+        padding: 10px;
+    }
+    samp {
+        white-space: pre-wrap;
+    }
+}
