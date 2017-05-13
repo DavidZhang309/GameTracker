@@ -34,6 +34,13 @@
                         <div>{{name}}: {{count}}</div>
                     {{/each}}
                 </div>
+                <div class="col-sm-3">
+                    <h3>Stats (Weighted)</h3>
+                    <div>Average BPM: {{top_perf_aggregate.avg_bpm}}</div>
+                    <div>Average length: {{top_perf_aggregate.avg_length}}</div>
+                    <div>Average accuracy: {{top_perf_aggregate.avg_acc}}%</div>
+                    <div>Full combo count: {{top_perf_aggregate.fc_count}}</div>
+                </div>
             </div>
             <h3>Top {{top_perf_aggregate.count}} performances</h3>
             {{#each top_performances}}

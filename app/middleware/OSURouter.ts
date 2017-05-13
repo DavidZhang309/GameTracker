@@ -96,14 +96,16 @@ export class OSURouter implements IServiceRouter {
         }).then((beatmaps) => {
             let intl_count = INTL_NAMES.slice().map((name) => { return { name: name, count: 0 }; });
             let genre_count = GENRE_NAMES.slice().map((name) => { return { name: name, count: 0 }; });
+            let length_sum = 0;
+            let bpm_sum = 0;
+            let acc_sum = 0;
+            let fc_count = 0;
+            let weight_sum = 0;
 
             for(let i = 0; i < top_perf.length; i++) {
                 let perf_info = top_perf[i];
                 let beatmap_id = perf_info.beatmap_id;
                 let beatmap_info = beatmaps[beatmap_id];
-
-                intl_count[parseInt(beatmap_info.language_id)].count += 1;
-                genre_count[parseInt(beatmap_info.language_id)].count += 1;
 
                 let weighting = Math.pow(0.95, i);
                 let total_secs = parseInt(beatmap_info.total_length);
@@ -113,13 +115,22 @@ export class OSURouter implements IServiceRouter {
                     parseInt(perf_info.count100),
                     parseInt(perf_info.count50),
                     parseInt(perf_info.countmiss)
-                 ];
+                ];
 
-                 let hits = hitCount.reduce((accumulator, val, index) => {
+                let hits = hitCount.reduce((accumulator, val, index) => {
                     return accumulator + val * HITVALUE[index];
-                 }, 0);
-                 let totalHits = hitCount.reduce((acc, val) => { return acc + val; }, 0) * 300;
-                 let acc = (hits / totalHits) * 100;
+                }, 0);
+                let totalHits = hitCount.reduce((acc, val) => { return acc + val; }, 0) * 300;
+                let acc = (hits / totalHits) * 100;
+
+                intl_count[parseInt(beatmap_info.language_id)].count += 1;
+                genre_count[parseInt(beatmap_info.language_id)].count += 1;
+                bpm_sum += parseInt(beatmap_info.bpm) * weighting;
+                length_sum += total_secs * weighting;
+                acc_sum += acc * weighting;
+
+                fc_count += perf_info.maxcombo == beatmap_info.max_combo ? 1 : 0;
+                weight_sum += weighting;
 
                 top_perf_view.push({
                     perf_info: top_perf[i],
@@ -138,6 +149,7 @@ export class OSURouter implements IServiceRouter {
 
             intl_count = intl_count.filter((item) => { return item.count > 0; });
             genre_count = genre_count.filter((item) => { return item.count > 0; });
+            let avg_length = length_sum / weight_sum;
 
             for(let i = 0; i < recent_plays.length; i++) {
                 let beatmap_id = recent_plays[i].beatmap_id;
@@ -156,7 +168,11 @@ export class OSURouter implements IServiceRouter {
                 top_perf_aggregate: {
                     count: top_perf_view.length,
                     intl_count: intl_count,
-                    genre_count: genre_count
+                    genre_count: genre_count,
+                    avg_bpm: (bpm_sum / weight_sum).toFixed(2),
+                    avg_acc: (acc_sum / weight_sum).toFixed(2),
+                    avg_length: sprintf('%02d:%02d', avg_length / 60, avg_length % 60),
+                    fc_count: fc_count
                 },
                 recent_plays: recent_plays_view,
                 text_only: this.liteRender
