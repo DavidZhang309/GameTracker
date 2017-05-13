@@ -5,6 +5,32 @@ import { OSUDataService } from '../services/OSUDataService';
 import * as ArrayUtil from '../utils/array';
 
 const HITVALUE = [ 300, 100, 50, 0 ];
+const INTL_NAMES = [
+	'any',
+	'other',
+	'english',
+	'japanese',
+	'chinese',
+	'instrumental',
+	'korean',
+	'french',
+	'german',
+	'swedish',
+	'spanish',
+	'italian'
+];
+const GENRE_NAMES = [
+    'any',
+	'unspecified',
+	'video game',
+	'anime',
+	'rock',
+	'pop',
+	'other',
+	'novelty',
+	'hip hop',
+	'electronic'
+]
 
 export class OSURouter implements IServiceRouter {
     service = new OSUDataService();
@@ -68,10 +94,16 @@ export class OSURouter implements IServiceRouter {
 
             return this.service.getBeatmaps(beatmapIDs);
         }).then((beatmaps) => {
+            let intl_count = INTL_NAMES.slice().map((name) => { return { name: name, count: 0 }; });
+            let genre_count = GENRE_NAMES.slice().map((name) => { return { name: name, count: 0 }; });
+
             for(let i = 0; i < top_perf.length; i++) {
                 let perf_info = top_perf[i];
                 let beatmap_id = perf_info.beatmap_id;
                 let beatmap_info = beatmaps[beatmap_id];
+
+                intl_count[parseInt(beatmap_info.language_id)].count += 1;
+                genre_count[parseInt(beatmap_info.language_id)].count += 1;
 
                 let weighting = Math.pow(0.95, i);
                 let total_secs = parseInt(beatmap_info.total_length);
@@ -104,6 +136,9 @@ export class OSURouter implements IServiceRouter {
                 });
             }
 
+            intl_count = intl_count.filter((item) => { return item.count > 0; });
+            genre_count = genre_count.filter((item) => { return item.count > 0; });
+
             for(let i = 0; i < recent_plays.length; i++) {
                 let beatmap_id = recent_plays[i].beatmap_id;
                 recent_plays_view.push({
@@ -118,6 +153,11 @@ export class OSURouter implements IServiceRouter {
             response.render('pages/osu/osu_profile', {
                 user_info: user_info,
                 top_performances: top_perf_view,
+                top_perf_aggregate: {
+                    count: top_perf_view.length,
+                    intl_count: intl_count,
+                    genre_count: genre_count
+                },
                 recent_plays: recent_plays_view,
                 text_only: this.liteRender
             });
