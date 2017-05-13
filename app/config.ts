@@ -6,11 +6,11 @@ import { OSURouter } from './middleware/OSURouter';
 
 export const services = {
     '/m/osu': new OSURouter(true),
-    '/m/steam': new SteamRouter(),
+    '/m/steam': new SteamRouter(true),
     '/m/auth': new AuthRouter(true),
     '/m/': new TrackerRouter(true),
     '/osu': new OSURouter(false),
-    '/steam': new SteamRouter(),
+    '/steam': new SteamRouter(false),
     '/auth': new AuthRouter(false),
     '/': new TrackerRouter(false)
 }

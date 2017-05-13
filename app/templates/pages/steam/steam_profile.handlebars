@@ -1,0 +1,15 @@
+<main id="steam-profile" class="container">
+    <section class="panel">
+        <div class="panel-heading">User Info</div>
+        <div class="panel-body">
+            <img src="{{player_info.avatarfull}}">
+            <a href="{{player_info.profileurl}}"><h3>{{player_info.personaname}}</h3></a>
+        </div>
+        <div class="panel-heading" data-toggle="collapse" data-target="#game-list">Games</div>
+        <div id="game-list" class="panel-body collapse in">
+            {{#each games_list}}
+                {{>steam/game_entry}}
+            {{/each}}
+        </div>
+    </section>
+</main>
