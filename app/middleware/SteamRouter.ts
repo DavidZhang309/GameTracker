@@ -44,7 +44,8 @@ export class SteamRouter implements IServiceRouter {
             // render
             response.render('pages/steam/steam_profile', {
                 player_info: playerInfo,
-                games_list: games
+                games_list: games,
+                text_only: this.liteRender
             });
         }).catch((error) => {
             next(error);

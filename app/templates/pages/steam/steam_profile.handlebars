@@ -2,7 +2,7 @@
     <section class="panel">
         <div class="panel-heading">User Info</div>
         <div class="panel-body">
-            <img src="{{player_info.avatarfull}}">
+            {{#unless @root.text_only}}<img src="{{player_info.avatarfull}}">{{/unless}}
             <a href="{{player_info.profileurl}}"><h3>{{player_info.personaname}}</h3></a>
         </div>
         <div class="panel-heading" data-toggle="collapse" data-target="#game-list">Games</div>
