@@ -40,17 +40,12 @@ export abstract class BaseDataService {
                     if (success) { 
                         resolve(chunks.join(''));     
                     } else {
-                        reject({
-                            status: response.statusCode,
-                            message: chunks.join('')
-                        })
+                        let error = new Error("API server returned code " + response.statusCode + " with message: " + chunks.join(''));
+                        reject(error);
                     }
                 });
-            }).on('error', (response) => {
-                //console.log(response.message)
-                reject({
-                    message: 'Http error: ' + response.name
-                })
+            }).on('error', (error) => {
+                reject(error);
             });
         });
     }
