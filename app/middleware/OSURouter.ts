@@ -122,10 +122,6 @@ export class OSURouter implements IServiceRouter {
                 text_only: this.liteRender
             });
         }).catch((error) => {
-            console.log(error);
-            response.render("pages/500", {
-                error: error
-            });
             next(error);
         });
     }
