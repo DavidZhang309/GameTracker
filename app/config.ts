@@ -17,3 +17,5 @@ export const services = {
 
 export const detailed500error = process.env.NODE_ENV != 'production';
 export const generic500error = 'Unable to process request';
+
+export const enableOSUAPI = false;

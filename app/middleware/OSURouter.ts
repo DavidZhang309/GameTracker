@@ -3,6 +3,7 @@ import { sprintf } from 'sprintf-js';
 import { IServiceRouter } from './IServiceRouter';
 import { OSUDataService } from '../services/OSUDataService';
 import * as ArrayUtil from '../utils/array';
+import * as config from '../config';
 
 const HITVALUE = [ 300, 100, 50, 0 ];
 const INTL_NAMES = [
@@ -40,7 +41,9 @@ export class OSURouter implements IServiceRouter {
     public constructor(lite: boolean) {
         this.liteRender = lite;
 
-        this.router.route('/beatmaps').get((req, res) => { this.apiGetBeatmaps(req, res); });
+        if (config.enableOSUAPI) {
+            this.router.route('/beatmaps').get((req, res) => { this.apiGetBeatmaps(req, res); });
+        }
         this.router.route('/profile/').get((req, res) => { res.render('pages/osu/osu_profile_search'); });
         this.router.route('/profile/:u').get((req, res, next) => { this.profilePage(req, res, next); });
     }
