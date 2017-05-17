@@ -32,6 +32,23 @@ const GENRE_NAMES = [
 	'hip hop',
 	'electronic'
 ]
+const MOD_NAMES = [
+    'NoFail',
+    'Easy',
+    'NoVideo',
+    'Hidden',
+    'HardRock',
+    'SuddenDeath',
+    'DoubleTime',
+    'Relax',
+    'HalfTime',
+    'Nightcore',
+    'Flashlight',
+    'Autoplay',
+    'SpunOut',
+    'Relax2',
+    'Perfect'
+]
 
 export class OSURouter implements IServiceRouter {
     service = new OSUDataService();
@@ -110,6 +127,12 @@ export class OSURouter implements IServiceRouter {
                 let beatmap_id = perf_info.beatmap_id;
                 let beatmap_info = beatmaps[beatmap_id];
 
+                let modFlagData = parseInt(perf_info.enabled_mods);
+                let modFlags = MOD_NAMES.filter((item, index) => {
+                    // AND, either 0 or 2^n from bit set
+                    return (modFlagData & Math.pow(2, index)) > 0; 
+                });
+
                 let weighting = Math.pow(0.95, i);
                 let total_secs = parseInt(beatmap_info.total_length);
 
@@ -145,7 +168,9 @@ export class OSURouter implements IServiceRouter {
                         fc_percent_html: perf_info.maxcombo == beatmap_info.max_combo ? 
                             "<b>FC</b>" : 
                             (parseInt(perf_info.maxcombo) * 100 / parseInt(beatmap_info.max_combo)).toFixed(0) + '%',
-                        acc: acc 
+                        acc: acc ,
+                        no_mod: modFlagData == 0,
+                        mods: modFlags.join(',')
                     }
                 });
             }
