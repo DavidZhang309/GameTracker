@@ -2,8 +2,11 @@ import { Router } from 'express';
 import { sprintf } from 'sprintf-js';
 import { IServiceRouter } from './IServiceRouter';
 import { OSUDataService } from '../services/OSUDataService';
+import * as time_ago_lib from 'time-ago';
 import * as ArrayUtil from '../utils/array';
 import * as config from '../config';
+
+let time_ago = time_ago_lib();
 
 const HITVALUE = [ 300, 100, 50, 0 ];
 const INTL_NAMES = [
@@ -133,6 +136,16 @@ export class OSURouter implements IServiceRouter {
                     return (modFlagData & Math.pow(2, index)) > 0; 
                 });
 
+                let dateParts = perf_info.date.split(/[- :]/);
+                let date = new Date(Date.UTC(
+                    parseInt(dateParts[0]), 
+                    parseInt(dateParts[1])-1, 
+                    parseInt(dateParts[2]), 
+                    parseInt(dateParts[3]), 
+                    parseInt(dateParts[4]), 
+                    parseInt(dateParts[5])
+                ));
+
                 let weighting = Math.pow(0.95, i);
                 let total_secs = parseInt(beatmap_info.total_length);
 
@@ -170,7 +183,8 @@ export class OSURouter implements IServiceRouter {
                             (parseInt(perf_info.maxcombo) * 100 / parseInt(beatmap_info.max_combo)).toFixed(0) + '%',
                         acc: acc ,
                         no_mod: modFlagData == 0,
-                        mods: modFlags.join(',')
+                        mods: modFlags.join(','),
+                        time_ago: time_ago.ago(date)
                     }
                 });
             }
@@ -183,10 +197,7 @@ export class OSURouter implements IServiceRouter {
                 let beatmap_id = recent_plays[i].beatmap_id;
                 recent_plays_view.push({
                     beatmap_info: beatmaps[beatmap_id],
-                    play_info: recent_plays[i],
-                    custom_info: {
-
-                    }
+                    play_info: recent_plays[i]
                 })
             }
 
