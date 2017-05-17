@@ -163,7 +163,7 @@ export class OSURouter implements IServiceRouter {
                 let acc = (hits / totalHits) * 100;
 
                 intl_count[parseInt(beatmap_info.language_id)].count += 1;
-                genre_count[parseInt(beatmap_info.language_id)].count += 1;
+                genre_count[parseInt(beatmap_info.genre_id)].count += 1;
                 bpm_sum += parseInt(beatmap_info.bpm) * weighting;
                 length_sum += total_secs * weighting;
                 acc_sum += acc * weighting;
