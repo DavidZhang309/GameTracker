@@ -32,6 +32,7 @@ const GENRE_NAMES = [
 	'pop',
 	'other',
 	'novelty',
+    null,
 	'hip hop',
 	'electronic'
 ]
