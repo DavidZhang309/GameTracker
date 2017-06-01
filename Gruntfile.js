@@ -36,8 +36,8 @@ module.exports = function(grunt) {
         },
         ts: {
             app: {
-                src: ['app/**/*.ts', '!app/client/**'],
-                dest: 'build/',
+                src: ['app/server/**/*.ts'],//, '!app/client/**'],
+                dest: 'build/server',
                 options: {
                     lib: [ "es2015" ]
                 }

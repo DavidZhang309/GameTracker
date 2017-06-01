@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "install": "grunt",
-    "start": "node build/index.js",
-    "dev-start": "grunt && node build/index.js",
+    "start": "node build/server/index.js",
+    "dev-start": "grunt && node build/server/index.js",
     "watch": "grunt dev"
   },
   "author": "David Zhang",

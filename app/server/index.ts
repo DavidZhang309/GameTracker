@@ -16,8 +16,8 @@ let app = express();
 // Template engine configuration
 app.engine('handlebars', exprhandlebars({
     defaultLayout: 'main',
-    layoutsDir: './app/templates/layouts/',
-    partialsDir: './app/templates/partials/',
+    layoutsDir: './app/server/templates/layouts/',
+    partialsDir: './app/server/templates/partials/',
     helpers: {
         footer_script: function(options) {
             this._footer_scripts = options.fn(this);
@@ -28,7 +28,7 @@ app.engine('handlebars', exprhandlebars({
         }
     }
 }));
-app.set('views', './app/templates');
+app.set('views', './app/server/templates');
 app.set('view engine', 'handlebars');
 
 app.use(express_parser.json());
