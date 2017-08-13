@@ -75,6 +75,6 @@ app.use(function(error: Error, request: Request, response: Response, next) { //e
     
 });
 
-app.listen(5590, function(){
+app.listen(config.port, function(){
     console.log('started');
 })
