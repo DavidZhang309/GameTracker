@@ -60,7 +60,7 @@ export class OSUDataService extends BaseDataService {
             parseInt(dateParts[3]), 
             parseInt(dateParts[4]), 
             parseInt(dateParts[5])
-        ));
+        ) - (8 * 60 * 60 * 1000)); // UTC+8
 
         return {
             beatmap_id: raw.beatmap_id,

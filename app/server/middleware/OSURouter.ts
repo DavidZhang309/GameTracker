@@ -138,6 +138,9 @@ export class OSURouter implements IServiceRouter {
                 });
 
                 top_perf_view.push({
+                    pp: perf_data.pp.toFixed(4),
+                    beatmap_id: beatmap_id,
+                    
                     perf_info: top_perf[i],
                     beatmap_info: beatmaps[beatmap_id],
                     custom_info: {
@@ -149,6 +152,7 @@ export class OSURouter implements IServiceRouter {
                         no_mod: perf_data.enabled_mods == 0,
                         mods: modFlags.join(','),
                         time_ago: time_ago.ago(perf_data.date),
+                        play_date_string: perf_data.date.toLocaleString()
                     }
                 });
 

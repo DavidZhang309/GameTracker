@@ -11,7 +11,7 @@
             {{/unless}}
             <div class="beatmap-info">
                 <div>
-                    <a href="https://osu.ppy.sh/b/{{beatmap_info.beatmap_id}}">
+                    <a href="https://osu.ppy.sh/b/{{beatmap_id}}">
                         {{beatmap_info.artist}} - {{beatmap_info.title}}
                     </a> [{{beatmap_info.version}}] ({{custom_info.time_str}})
                 </div>
@@ -30,9 +30,9 @@
             <div>{{perf_info.count300}} / {{perf_info.count100}} / {{perf_info.count50}} / {{perf_info.countmiss}}</div>
         </div>
         <div class="col-xs-6 col-sm-2 pp-entry">
-            <div>{{perf_info.pp}}PP</div>
+            <div>{{pp}}PP</div>
             <div>{{custom_info.weighting_percent}}% = {{custom_info.weighted_pp}}PP</div>
-            <div>{{custom_info.time_ago}}</div>
+            <div title="{{custom_info.play_date_string}}">{{custom_info.time_ago}}</div>
         </div>
     </div>
 </div>
