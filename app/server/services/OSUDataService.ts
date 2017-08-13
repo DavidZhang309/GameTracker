@@ -13,7 +13,7 @@ export class OSUDataService extends BaseDataService {
         return config.osu_api_host;
     }
 
-    protected queryOSUAPI(api: string, args: object): Promise<Object[]> {
+    protected queryOSUAPI(api: string, args: any): Promise<any[]> {
         let path = api + '?k=' + config.osu_api_key;
         // build query string
         let q = querystring.stringify(args);
@@ -26,7 +26,7 @@ export class OSUDataService extends BaseDataService {
         });
     }
 
-    private getBeatmapFromAPI(beatmapID): Promise<Object> {
+    private getBeatmapFromAPI(beatmapID): Promise<any> {
         return this.queryOSUAPI('/api/get_beatmaps', {
             b: beatmapID
         }).then(function(data) {
@@ -38,7 +38,7 @@ export class OSUDataService extends BaseDataService {
         });
     }
 
-    public getProfile(userID): Promise<Object> {
+    public getProfile(userID): Promise<any> {
         return this.queryOSUAPI('/api/get_user', {
             u: userID
         }).then(function(data) {
@@ -50,16 +50,47 @@ export class OSUDataService extends BaseDataService {
         });
     }
 
-    public getTopPerformances(userID, limit): Promise<Object[]> {
+    protected parsePerformanceData(raw): IPerformanceData {
+        // parse date
+        let dateParts = raw.date.split(/[- :]/);
+        let date = new Date(Date.UTC(
+            parseInt(dateParts[0]), 
+            parseInt(dateParts[1])-1, 
+            parseInt(dateParts[2]), 
+            parseInt(dateParts[3]), 
+            parseInt(dateParts[4]), 
+            parseInt(dateParts[5])
+        ));
+
+        return {
+            beatmap_id: raw.beatmap_id,
+            score: parseInt(raw.score),
+            maxcombo: parseInt(raw.maxcombo),
+            count300: parseInt(raw.count300),
+            count100: parseInt(raw.count100),
+            count50: parseInt(raw.count50),
+            countmiss: parseInt(raw.countmiss),
+            countkatu: parseInt(raw.countkatu),
+            countgeki: parseInt(raw.countgeki),
+            perfect: raw.perfect == '1',
+            enabled_mods: parseInt(raw.enabled_mods),
+            user_id: raw.user_id,
+            date: date,
+            rank: raw.rank,
+            pp: parseFloat(raw.pp),
+        };
+    }
+
+    public getTopPerformances(userID, limit): Promise<IPerformanceData[]> {
         return this.queryOSUAPI('/api/get_user_best', {
             u: userID,
             limit: limit
-        }).then(function(data) {
-            return data;
+        }).then((data: any[]) => {
+            return data.map((raw) => { return this.parsePerformanceData(raw); });
         });
     }
 
-    public getRecentPlays(userID, limit): Promise<Object[]> {
+    public getRecentPlays(userID, limit): Promise<any[]> {
         return this.queryOSUAPI('/api/get_user_recent', {
             u: userID,
             limit: limit
@@ -68,9 +99,9 @@ export class OSUDataService extends BaseDataService {
         });
     }
 
-    private getBeatmapsFromCache(connection, beatmapIDs): Promise<Object[]> {
+    private getBeatmapsFromCache(connection, beatmapIDs): Promise<any[]> {
         let bCollection = connection.collection('osu_beatmaps');
-        return new Promise<Object[]>((resolve, reject) => {
+        return new Promise<any[]>((resolve, reject) => {
             bCollection.find({
                 beatmap_id: { $in: beatmapIDs }
             }).toArray((err, docs) => {
@@ -182,4 +213,22 @@ export interface IBeatmap {
     playcount: string;
     passcount: string;
     max_combo: string;
+}
+
+export interface IPerformanceData {
+    beatmap_id: string
+    score: number
+    maxcombo: number
+    count300: number
+    count100: number
+    count50: number
+    countmiss: number
+    countkatu: number
+    countgeki: number
+    perfect: boolean
+    enabled_mods: number
+    user_id: string
+    date: Date
+    rank: string
+    pp: number
 }

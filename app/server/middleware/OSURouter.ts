@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { sprintf } from 'sprintf-js';
 import { IServiceRouter } from './IServiceRouter';
-import { OSUDataService } from '../services/OSUDataService';
+import { OSUDataService, IPerformanceData } from '../services/OSUDataService';
+import { OSUStatService, IPerformanceStats } from '../services/OSUStatService';
 import * as time_ago_lib from 'time-ago';
 import * as ArrayUtil from '../utils/array';
 import * as config from '../config';
@@ -56,6 +57,7 @@ const MOD_NAMES = [
 
 export class OSURouter implements IServiceRouter {
     service = new OSUDataService();
+    stats = new OSUStatService();
     router = Router();
     liteRender: boolean;
 
@@ -90,22 +92,15 @@ export class OSURouter implements IServiceRouter {
     // server-sided pages
     public profilePage(request, response, next) {
         let userID = request.params['u'];
-        
-        let user_info;
-        let top_perf;
+
         let top_perf_view = [];
-        let recent_plays;
         let recent_plays_view = [];
 
         Promise.all([
             this.service.getProfile(userID),
             this.service.getTopPerformances(userID, 100),
             this.service.getRecentPlays(userID, 50)
-        ]).then((results) => {
-            user_info = results[0];
-            top_perf = results[1];
-            recent_plays = results[2];
-
+        ]).then(([user_info, top_perf, recent_plays]) => {
             let beatmapIDs = [];
             for(let i = 0; i < top_perf.length; i++) {
                 beatmapIDs.push(top_perf[i].beatmap_id);
@@ -116,8 +111,10 @@ export class OSURouter implements IServiceRouter {
 
             beatmapIDs = ArrayUtil.distinct(beatmapIDs);
 
-            return this.service.getBeatmaps(beatmapIDs);
-        }).then((beatmaps) => {
+            return this.service.getBeatmaps(beatmapIDs).then((beatmaps) => {
+                return [user_info, top_perf, recent_plays, beatmaps];
+            });
+        }).then(([user_info, top_perf, recent_plays, beatmaps]) => {
             let intl_count = INTL_NAMES.slice().map((name) => { return { name: name, count: 0 }; });
             let genre_count = GENRE_NAMES.slice().map((name) => { return { name: name, count: 0 }; });
             let length_sum = 0;
@@ -127,69 +124,45 @@ export class OSURouter implements IServiceRouter {
             let weight_sum = 0;
 
             for(let i = 0; i < top_perf.length; i++) {
-                let perf_info = top_perf[i];
-                let beatmap_id = perf_info.beatmap_id;
+                let weighting = Math.pow(0.95, i);
+                
+                let perf_data: IPerformanceData = top_perf[i];
+                let beatmap_id = perf_data.beatmap_id;
                 let beatmap_info = beatmaps[beatmap_id];
+                let perf_stats = this.stats.getPerformanceStats(perf_data, beatmap_info, weighting);
+                
 
-                let modFlagData = parseInt(perf_info.enabled_mods);
                 let modFlags = MOD_NAMES.filter((item, index) => {
                     // AND, either 0 or 2^n from bit set
-                    return (modFlagData & Math.pow(2, index)) > 0; 
+                    return (perf_data.enabled_mods & Math.pow(2, index)) > 0; 
                 });
-
-                let dateParts = perf_info.date.split(/[- :]/);
-                let date = new Date(Date.UTC(
-                    parseInt(dateParts[0]), 
-                    parseInt(dateParts[1])-1, 
-                    parseInt(dateParts[2]), 
-                    parseInt(dateParts[3]), 
-                    parseInt(dateParts[4]), 
-                    parseInt(dateParts[5])
-                ));
-
-                let weighting = Math.pow(0.95, i);
-                let total_secs = parseInt(beatmap_info.total_length);
-
-                let hitCount = [ 
-                    parseInt(perf_info.count300),
-                    parseInt(perf_info.count100),
-                    parseInt(perf_info.count50),
-                    parseInt(perf_info.countmiss)
-                ];
-
-                let hits = hitCount.reduce((accumulator, val, index) => {
-                    return accumulator + val * HITVALUE[index];
-                }, 0);
-                let totalHits = hitCount.reduce((acc, val) => { return acc + val; }, 0) * 300;
-                let acc = (hits / totalHits) * 100;
-
-                intl_count[parseInt(beatmap_info.language_id)].count += 1;
-                genre_count[parseInt(beatmap_info.genre_id)].count += 1;
-                bpm_sum += parseInt(beatmap_info.bpm) * weighting;
-                length_sum += total_secs * weighting;
-                acc_sum += acc * weighting;
-
-                fc_count += perf_info.maxcombo == beatmap_info.max_combo ? 1 : 0;
-                weight_sum += weighting;
 
                 top_perf_view.push({
                     perf_info: top_perf[i],
                     beatmap_info: beatmaps[beatmap_id],
                     custom_info: {
-                        time_str: sprintf('%02d:%02d', total_secs / 60, total_secs % 60),
-                        weighted_pp: (top_perf[i].pp * weighting).toFixed(4),
+                        time_str: sprintf('%02d:%02d', perf_stats.time.minutes, perf_stats.time.seconds),
+                        weighted_pp: (perf_stats.weightedPP).toFixed(4),
                         weighting_percent: (weighting * 100).toFixed(2),
-                        fc_percent_html: perf_info.maxcombo == beatmap_info.max_combo ? 
-                            "<b>FC</b>" : 
-                            (parseInt(perf_info.maxcombo) * 100 / parseInt(beatmap_info.max_combo)).toFixed(0) + '%',
-                        acc: acc ,
-                        no_mod: modFlagData == 0,
+                        fc_percent_html: perf_data.perfect ? "<b>FC</b>" : (perf_data.maxcombo * 100 / parseInt(beatmap_info.max_combo)).toFixed(0) + '%',
+                        acc: perf_stats.accuracy,
+                        no_mod: perf_data.enabled_mods == 0,
                         mods: modFlags.join(','),
-                        time_ago: time_ago.ago(date)
+                        time_ago: time_ago.ago(perf_data.date),
                     }
                 });
+
+                // Aggregate performance
+                intl_count[parseInt(beatmap_info.language_id)].count += 1;
+                genre_count[parseInt(beatmap_info.genre_id)].count += 1;
+                bpm_sum += parseInt(beatmap_info.bpm) * weighting;
+                length_sum += perf_stats.time.totalSeconds * weighting;
+                acc_sum += perf_stats.accuracy * weighting;
+                weight_sum += weighting;
+                fc_count += perf_data.maxcombo == beatmap_info.max_combo ? 1 : 0;
             }
 
+            // Aggregate
             intl_count = intl_count.filter((item) => { return item.count > 0; });
             genre_count = genre_count.filter((item) => { return item.count > 0; });
             let avg_length = length_sum / weight_sum;
