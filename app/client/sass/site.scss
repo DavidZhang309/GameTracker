@@ -65,6 +65,14 @@ $main_bg: rgba(95, 168, 211, 1);
         cursor: pointer;
     }
 
+    .position {
+        float: left;
+        font-size: 18px;
+        font-weight: bold;
+        width: 45px;
+        line-height: 60px;
+    }
+
     .preview {
         position: relative;
         width: 80px;

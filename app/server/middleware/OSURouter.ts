@@ -138,6 +138,7 @@ export class OSURouter implements IServiceRouter {
                 });
 
                 top_perf_view.push({
+                    perf_position: i + 1,
                     pp: perf_data.pp.toFixed(4),
                     beatmap_id: beatmap_id,
                     
