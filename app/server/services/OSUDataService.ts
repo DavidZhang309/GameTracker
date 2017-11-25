@@ -99,7 +99,7 @@ export class OSUDataService extends BaseDataService {
         });
     }
 
-    private getBeatmapsFromCache(connection, beatmapIDs): Promise<any[]> {
+    private getBeatmapsFromCache(connection, beatmapIDs): Promise<IBeatmap[]> {
         let bCollection = connection.collection('osu_beatmaps');
         return new Promise<any[]>((resolve, reject) => {
             bCollection.find({
@@ -121,46 +121,25 @@ export class OSUDataService extends BaseDataService {
         });
     }
 
-    public getBeatmaps(beatmapIDs: number[]): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
-            MongoClient.connect(config.mongodb_connection, (err, db) =>{
-                if (err == null) {
-                    resolve(db);
-                } else {
-                    reject(err);
-                }
-            });
-        }).then((db) => { //connected to db
-            return this.getBeatmapsFromCache(db, beatmapIDs).then((cachedData) => { //cache queried
-                // get missing beatmaps
-                let missing = beatmapIDs.filter((beatmapID) => {
-                    for(let i = 0; i < cachedData.length; i++) {
-                        if (beatmapID == (<any>cachedData[i]).beatmap_id) { return false; }
-                    }
-                    return true;
-                });
+    public getBeatmaps(beatmapIDs: string[]): Promise<{ [beatmapID: string]: IBeatmap }> {
+        return this.connectToDB() // Connect to db
+            .then( // Get cached beatmaps and join with db connection
+                (db) => this.getBeatmapsFromCache(db, beatmapIDs).then((cachedData) => [db, cachedData] as [mongodb.Db, IBeatmap[]])
+            ).then(([db, cachedData]) => {
+                // Get missing beatmaps
+                const missingDataPromises = beatmapIDs.filter( // Get beatmap id that are not cached
+                    (beatmapID) => cachedData.findIndex((data) => data.beatmap_id === beatmapID) === -1
+                ).map((beatmapID) => this.getBeatmapFromAPI(beatmapID)); // Query for missing beatmaps
 
-                let missingQuery = [];
-                // query for missing beatmaps
-                for(let i = 0; i < missing.length; i++) {
-                    missingQuery.push(this.getBeatmapFromAPI(missing[i]).then((data) => {
-                        // add to cache
-                        this.updateBeatmapCache(db, (<any>data).beatmap_id, data);
-                        return data;
-                    }));
-                }
-                // gather and return full result set
-                return Promise.all(missingQuery).then((missingData) => {
-                    let resultData = cachedData.concat(missingData);
-                    let result = { };
-                    for(let i = 0; i < resultData.length; i++) {
-                        if (resultData[i] == null) { continue; }
-                        result[(<any>resultData[i]).beatmap_id] = resultData[i];
-                    }  
-                    return result;
-                });
-            });
-        });
+                // Cache new data
+                missingDataPromises.forEach((query) => query.then((data) => this.updateBeatmapCache(db, data.beatmap_id, data)));
+
+                return [cachedData, missingDataPromises] as [IBeatmap[], Promise<IBeatmap>[]];
+            }).then( // wait for promises to fulfill and join data
+                ([cachedData, missingDataPromises]) => Promise.all(missingDataPromises).then((queriedMaps) => cachedData.concat(queriedMaps))
+            ).then( // build mapping object
+                (beatmaps) => beatmaps.reduce((acc, beatmap) => { acc[beatmap.beatmap_id] = beatmap; return acc; }, { })
+            );
     }
 }
 
@@ -216,19 +195,19 @@ export interface IBeatmap {
 }
 
 export interface IPerformanceData {
-    beatmap_id: string
-    score: number
-    maxcombo: number
-    count300: number
-    count100: number
-    count50: number
-    countmiss: number
-    countkatu: number
-    countgeki: number
-    perfect: boolean
-    enabled_mods: number
-    user_id: string
-    date: Date
-    rank: string
-    pp: number
+    beatmap_id: string;
+    score: number;
+    maxcombo: number;
+    count300: number;
+    count100: number;
+    count50: number;
+    countmiss: number;
+    countkatu: number;
+    countgeki: number;
+    perfect: boolean;
+    enabled_mods: number;
+    user_id: string;
+    date: Date;
+    rank: string;
+    pp: number;
 }
