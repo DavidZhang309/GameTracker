@@ -52,11 +52,6 @@ $main_bg: rgba(95, 168, 211, 1);
     //     background-color: $color1;
     // }
 
-    .beatmap-info {
-        display: inline-block;
-        padding-left: 5px;
-    }
-
     .pp-entry {
         text-align: right;
     }
@@ -77,7 +72,7 @@ $main_bg: rgba(95, 168, 211, 1);
         position: relative;
         width: 80px;
         height: 60px;
-        display: inline-block;
+        margin-right: 5px;
         float: left;
     }
     .preview-hover {
