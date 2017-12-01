@@ -7,6 +7,8 @@ import { BaseDataService } from './BaseDataService';
 var config = require('../config.json');
 var MongoClient = mongodb.MongoClient;
 
+const PERFORMANCE_QUERY_LIMIT = 100;
+
 //TODO: handle error cases
 export class OSUDataService extends BaseDataService {
     public getAPIHost() {
@@ -81,10 +83,10 @@ export class OSUDataService extends BaseDataService {
         };
     }
 
-    public getTopPerformances(userID, limit): Promise<IPerformanceData[]> {
+    public getTopPerformances(userID): Promise<IPerformanceData[]> {
         return this.queryOSUAPI('/api/get_user_best', {
             u: userID,
-            limit: limit
+            limit: PERFORMANCE_QUERY_LIMIT
         }).then((data: any[]) => {
             return data.map((raw) => { return this.parsePerformanceData(raw); });
         });

@@ -95,7 +95,7 @@ export class OSURouter implements IServiceRouter {
 
         Promise.all([
             this.service.getProfile(userID),
-            this.service.getTopPerformances(userID, 100),
+            this.service.getTopPerformances(userID),
             this.service.getRecentPlays(userID, 50)
         ]).then(([user_info, top_perf, recent_plays]) => {
             // Gather beatmap IDs
