@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { sprintf } from 'sprintf-js';
 import { IServiceRouter } from './IServiceRouter';
-import { OSUDataService, IPerformanceData } from '../services/OSUDataService';
+import { OSUDataService, IPerformanceData, IBeatmap } from '../services/OSUDataService';
 import { OSUStatService, IPerformanceStats } from '../services/OSUStatService';
 import * as time_ago_lib from 'time-ago';
 import * as ArrayUtil from '../utils/array';
@@ -73,7 +73,7 @@ export class OSURouter implements IServiceRouter {
 
     public apiGetBeatmaps(request, response) {
         // parse request
-        let beatmaps = request.query.b;
+        let beatmaps: string[] = request.query.b;
         if (beatmaps == null) {
             response.send([]);
             return;
@@ -91,109 +91,93 @@ export class OSURouter implements IServiceRouter {
 
     // server-sided pages
     public profilePage(request, response, next) {
-        let userID = request.params['u'];
-
-        let top_perf_view = [];
-        let recent_plays_view = [];
+        const userID = request.params['u'];
 
         Promise.all([
             this.service.getProfile(userID),
             this.service.getTopPerformances(userID, 100),
             this.service.getRecentPlays(userID, 50)
         ]).then(([user_info, top_perf, recent_plays]) => {
-            let beatmapIDs = [];
-            for(let i = 0; i < top_perf.length; i++) {
-                beatmapIDs.push(top_perf[i].beatmap_id);
-            }
-            for(let i = 0; i < recent_plays.length; i++) {
-                beatmapIDs.push(recent_plays[i].beatmap_id);
-            }
-
-            beatmapIDs = ArrayUtil.distinct(beatmapIDs);
-
-            return this.service.getBeatmaps(beatmapIDs).then((beatmaps) => {
-                return [user_info, top_perf, recent_plays, beatmaps];
-            });
-        }).then(([user_info, top_perf, recent_plays, beatmaps]) => {
-            let intl_count = INTL_NAMES.slice().map((name) => { return { name: name, count: 0 }; });
-            let genre_count = GENRE_NAMES.slice().map((name) => { return { name: name, count: 0 }; });
-            let length_sum = 0;
-            let bpm_sum = 0;
-            let acc_sum = 0;
-            let fc_count = 0;
-            let weight_sum = 0;
-
-            for(let i = 0; i < top_perf.length; i++) {
-                let weighting = Math.pow(0.95, i);
-                
-                let perf_data: IPerformanceData = top_perf[i];
-                let beatmap_id = perf_data.beatmap_id;
-                let beatmap_info = beatmaps[beatmap_id];
-                let perf_stats = this.stats.getPerformanceStats(perf_data, beatmap_info, weighting);
-                
-
-                let modFlags = MOD_NAMES.filter((item, index) => {
-                    // AND, either 0 or 2^n from bit set
-                    return (perf_data.enabled_mods & Math.pow(2, index)) > 0; 
-                });
-
-                top_perf_view.push({
-                    perf_position: i + 1,
-                    pp: perf_data.pp.toFixed(4),
-                    beatmap_id: beatmap_id,
-                    
-                    perf_info: top_perf[i],
-                    beatmap_info: beatmaps[beatmap_id],
-                    custom_info: {
-                        time_str: sprintf('%02d:%02d', perf_stats.time.minutes, perf_stats.time.seconds),
-                        weighted_pp: (perf_stats.weightedPP).toFixed(4),
-                        weighting_percent: (weighting * 100).toFixed(2),
-                        fc_percent_html: perf_data.perfect ? "<b>FC</b>" : (perf_data.maxcombo * 100 / parseInt(beatmap_info.max_combo)).toFixed(0) + '%',
-                        acc: perf_stats.accuracy,
-                        no_mod: perf_data.enabled_mods == 0,
-                        mods: modFlags.join(','),
-                        time_ago: time_ago.ago(perf_data.date),
-                        play_date_string: perf_data.date.toLocaleString()
-                    }
-                });
-
-                // Aggregate performance
-                intl_count[parseInt(beatmap_info.language_id)].count += 1;
-                genre_count[parseInt(beatmap_info.genre_id)].count += 1;
-                bpm_sum += parseInt(beatmap_info.bpm) * weighting;
-                length_sum += perf_stats.time.totalSeconds * weighting;
-                acc_sum += perf_stats.accuracy * weighting;
-                weight_sum += weighting;
-                fc_count += perf_data.maxcombo == beatmap_info.max_combo ? 1 : 0;
-            }
-
-            // Aggregate
-            intl_count = intl_count.filter((item) => { return item.count > 0; });
-            genre_count = genre_count.filter((item) => { return item.count > 0; });
-            let avg_length = length_sum / weight_sum;
-
-            for(let i = 0; i < recent_plays.length; i++) {
-                let beatmap_id = recent_plays[i].beatmap_id;
-                recent_plays_view.push({
-                    beatmap_info: beatmaps[beatmap_id],
-                    play_info: recent_plays[i]
-                })
-            }
-
-            response.render('pages/osu/osu_profile', {
+            // Gather beatmap IDs
+            const beatmapIDs = ArrayUtil.distinct([
+                ...top_perf.map((perf) => perf.beatmap_id),
+                ...recent_plays.map((recent) => recent.beatmap_id),
+            ]);            
+            // Make query and gather needed data
+            return this.service.getBeatmaps(beatmapIDs).then((beatmaps) => ({
                 user_info: user_info,
-                top_performances: top_perf_view,
-                top_perf_aggregate: {
-                    count: top_perf_view.length,
-                    intl_count: intl_count,
-                    genre_count: genre_count,
-                    avg_bpm: (bpm_sum / weight_sum).toFixed(2),
-                    avg_acc: (acc_sum / weight_sum).toFixed(2),
-                    avg_length: sprintf('%02d:%02d', avg_length / 60, avg_length % 60),
-                    fc_count: fc_count
-                },
-                recent_plays: recent_plays_view,
-                text_only: this.liteRender
+                performances: top_perf.map((perf, index) => ({
+                    weighting: Math.pow(0.95, index),
+                    data: perf,
+                    stats: this.stats.getPerformanceStats(perf, beatmaps[perf.beatmap_id], Math.pow(0.95, index)),
+                    beatmap: beatmaps[perf.beatmap_id]
+                })),
+                recent: recent_plays.map((recent_play) => ({
+                    data: recent_play,
+                    beatmap: beatmaps[recent_play.beatmap_id]
+                }))
+            }));
+        }).then((data) => {
+            response.render('pages/osu/osu_profile', {
+                text_only: this.liteRender,
+                user_info: data.user_info,
+
+                top_performances: data.performances.map((perf, i) => ({
+                    perf_info: perf.data,
+                    beatmap_info: perf.beatmap,
+
+                    position: i + 1,
+                    pp: perf.data.pp.toFixed(4),
+                    beatmap_id: perf.beatmap.beatmap_id,
+                    custom_info: {
+                        time_str: sprintf('%02d:%02d', perf.stats.time.minutes, perf.stats.time.seconds),
+                        weighted_pp: (perf.stats.weightedPP).toFixed(4),
+                        weighting_percent: (perf.weighting * 100).toFixed(2),
+                        fc_percent_html: perf.data.perfect ? "<b>FC</b>" : (perf.data.maxcombo * 100 / parseInt(perf.beatmap.max_combo)).toFixed(0) + '%',
+                        acc: perf.stats.accuracy,
+                        no_mod: perf.data.enabled_mods == 0,
+                        mods: MOD_NAMES.filter((item, index) => {
+                            // AND, either 0 or 2^n from bit set
+                            return (perf.data.enabled_mods & Math.pow(2, index)) > 0; 
+                        }).join(','),
+                        time_ago: time_ago.ago(perf.data.date),
+                        play_date_string: perf.data.date.toLocaleString()
+                    }
+                })),
+                top_perf_aggregate: ((aggregate) => {
+                    const avg_length = aggregate.length_sum / aggregate.weight_sum;
+                    return {
+                        count: data.performances.length,
+                        intl_count: aggregate.intl_count.filter((item) => { return item.count > 0; }),
+                        genre_count: aggregate.genre_count.filter((item) => { return item.count > 0; }),
+                        avg_bpm: (aggregate.bpm_sum / aggregate.weight_sum).toFixed(2),
+                        avg_acc: (aggregate.acc_sum / aggregate.weight_sum).toFixed(2),
+                        avg_length: sprintf('%02d:%02d', avg_length / 60, avg_length % 60),
+                        fc_count: data.performances.reduce((acc, perf) => acc + (perf.data.maxcombo === parseInt(perf.beatmap.max_combo, 10) ? 1 : 0), 0)
+                    };
+                })(data.performances.reduce((acc, perf) => {
+                    acc.intl_count[parseInt(perf.beatmap.language_id)].count += 1;
+                    acc.genre_count[parseInt(perf.beatmap.genre_id)].count += 1;
+                    acc.bpm_sum += parseInt(perf.beatmap.bpm) * perf.weighting;
+                    acc.length_sum += perf.stats.time.totalSeconds * perf.weighting;
+                    acc.acc_sum += perf.stats.accuracy * perf.weighting;
+                    acc.weight_sum += perf.weighting;
+                    acc.fc_count += perf.data.maxcombo === parseInt(perf.beatmap.max_combo, 10) ? 1 : 0;
+                    return acc;
+                }, {
+                    intl_count: INTL_NAMES.slice().map((name) => { return { name: name, count: 0 }; }),
+                    genre_count: GENRE_NAMES.slice().map((name) => { return { name: name, count: 0 }; }),
+                    length_sum: 0,
+                    bpm_sum: 0,
+                    acc_sum: 0,
+                    fc_count: 0,
+                    weight_sum: 0
+                })),
+
+                recent_plays: data.recent.map((recent_play) => ({
+                    play_info: recent_play.data,
+                    beatmap_info: recent_play.beatmap
+                }))
             });
         }).catch((error) => {
             next(error);
