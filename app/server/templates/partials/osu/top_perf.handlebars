@@ -3,35 +3,50 @@
         <div class="col-xs-12 col-md-8">
             <div class="position">#{{position}}</div>
             {{#unless @root.text_only}}
-            <div class="preview" data-beatmapset-id="{{beatmap_info.beatmapset_id}}">
+            <div class="preview" data-beatmapset-id="{{beatmap.beatmapset_id}}">
                 <div class="preview-hover">
                     <i class="fa fa-play"></i>
                 </div>
-                <img src="https://b.ppy.sh/thumb/{{beatmap_info.beatmapset_id}}.jpg">
+                <img src="https://b.ppy.sh/thumb/{{beatmap.beatmapset_id}}.jpg">
             </div>
             {{/unless}}
-            <div>
-                <a href="https://osu.ppy.sh/b/{{beatmap_id}}">
-                    {{beatmap_info.artist}} - {{beatmap_info.title}}
-                </a> [{{beatmap_info.version}}] ({{custom_info.time_str}})
+            <div class="beatmap-info">
+                <a href="https://osu.ppy.sh/b/{{beatmap.beatmap_id}}">
+                    {{beatmap.artist}} - {{beatmap.title}}
+                </a> [{{beatmap.version}}] ({{view.time_str}})
             </div>
-            <div>
-                Base: [<b>{{round_number beatmap_info.difficultyrating 2}}</b>] CS: {{beatmap_info.diff_size}} AR: {{beatmap_info.diff_approach}} OD: {{beatmap_info.diff_overall}} HP: {{beatmap_info.diff_drain}} BPM: {{beatmap_info.bpm}}
+            <div class="beatmap-info">
+                Base: [<b>{{round_number beatmap.difficultyrating 2}}</b>] CS: {{beatmap.diff_size}} AR: {{beatmap.diff_approach}} OD: {{beatmap.diff_overall}} HP: {{beatmap.diff_drain}} BPM: {{beatmap.bpm}}
             </div>
-            <div>
-                <b>{{custom_info.mods}}</b>
+            <div class="beatmap-info">
+                <b>{{view.mods}}</b>
             </div>
         </div>
         <div class="col-xs-6 col-md-2">
-            <div>[<b>{{perf_info.rank}}</b>][{{round_number custom_info.acc 2}}%]{{perf_info.score}}</div>
-		    <div>{{perf_info.maxcombo}}x / {{beatmap_info.max_combo}}x ({{{custom_info.fc_percent_html}}})</div>
-		    {{!--<div>{{perf_info.hit300 ?> / <?= $entry['hit_count'][1] ?> / <?= $entry['hit_count'][2] ?> / <?= $entry['hit_count'][3] ?></div>--}}
-            <div>{{perf_info.count300}} / {{perf_info.count100}} / {{perf_info.count50}} / {{perf_info.countmiss}}</div>
+            <div>[<b>{{data.rank}}</b>][{{round_number accuracy 2}}%] {{data.score}}</div>
+            <div>
+                {{#if isFC }}
+                    <b>{{beatmap.max_combo}}x Full Combo</b>
+                {{/if}}
+                {{#unless isFC }}
+                    {{data.maxcombo}}x / {{beatmap.max_combo}}x ({{view.fcPercent}}%)
+                {{/unless}}
+            </div>
+            {{!--<div>{{data.maxcombo}}x / {{beatmap.max_combo}}x ({{{view.fc_percent_html}}})</div>--}}
+		    {{!--<div>{{data.hit300 ?> / <?= $entry['hit_count'][1] ?> / <?= $entry['hit_count'][2] ?> / <?= $entry['hit_count'][3] ?></div>--}}
+            <div>
+                {{#if isPerfect}}
+                    <b>{{data.count300}} Hit Perfect</b>
+                {{/if}}
+                {{#unless isPerfect }}
+                    {{data.count300}} / {{data.count100}} / {{data.count50}} / {{data.countmiss}}
+                {{/unless}}
+            </div>
         </div>
         <div class="col-xs-6 col-md-2 pp-entry">
-            <div>{{pp}}PP</div>
-            <div>{{custom_info.weighting_percent}}% = {{custom_info.weighted_pp}}PP</div>
-            <div title="{{custom_info.play_date_string}}">{{custom_info.time_ago}}</div>
+            <div>{{round_number data.pp 4}}PP</div>
+            <div>{{view.weighting_percent}}% = {{round_number weightedPP 4}}PP</div>
+            <div title="{{view.play_date_string}}">{{view.time_ago}}</div>
         </div>
     </div>
 </div>

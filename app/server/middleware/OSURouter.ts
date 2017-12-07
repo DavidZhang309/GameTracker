@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { sprintf } from 'sprintf-js';
 import { IServiceRouter } from './IServiceRouter';
 import { OSUDataService, IPerformanceData, IBeatmap } from '../services/OSUDataService';
-import { OSUStatService, IPerformanceStats } from '../services/OSUStatService';
+import { OSUStatService, IPerformanceStats, OsuMods } from '../services/OSUStatService';
 import * as time_ago_lib from 'time-ago';
 import * as ArrayUtil from '../utils/array';
 import * as config from '../config';
@@ -36,28 +36,11 @@ const GENRE_NAMES = [
     null,
 	'hip hop',
 	'electronic'
-]
-const MOD_NAMES = [
-    'NoFail',
-    'Easy',
-    'NoVideo',
-    'Hidden',
-    'HardRock',
-    'SuddenDeath',
-    'DoubleTime',
-    'Relax',
-    'HalfTime',
-    'Nightcore',
-    'Flashlight',
-    'Autoplay',
-    'SpunOut',
-    'Relax2',
-    'Perfect'
-]
+];
 
 export class OSURouter implements IServiceRouter {
     service = new OSUDataService();
-    stats = new OSUStatService();
+    stats = new OSUStatService(this.service);
     router = Router();
     liteRender: boolean;
 
@@ -106,12 +89,7 @@ export class OSURouter implements IServiceRouter {
             // Make query and gather needed data
             return this.service.getBeatmaps(beatmapIDs).then((beatmaps) => ({
                 user_info: user_info,
-                performances: top_perf.map((perf, index) => ({
-                    weighting: Math.pow(0.95, index),
-                    data: perf,
-                    stats: this.stats.getPerformanceStats(perf, beatmaps[perf.beatmap_id], Math.pow(0.95, index)),
-                    beatmap: beatmaps[perf.beatmap_id]
-                })),
+                performances: top_perf.map((perf, index) => this.stats.getPerformanceStats(perf, beatmaps[perf.beatmap_id], Math.pow(0.95, index))),
                 recent: recent_plays.map((recent_play) => ({
                     data: recent_play,
                     beatmap: beatmaps[recent_play.beatmap_id]
@@ -123,27 +101,18 @@ export class OSURouter implements IServiceRouter {
                 user_info: data.user_info,
 
                 top_performances: data.performances.map((perf, i) => ({
-                    perf_info: perf.data,
-                    beatmap_info: perf.beatmap,
-
+                    ...perf,
                     position: i + 1,
-                    pp: perf.data.pp.toFixed(4),
-                    beatmap_id: perf.beatmap.beatmap_id,
-                    custom_info: {
-                        time_str: sprintf('%02d:%02d', perf.stats.time.minutes, perf.stats.time.seconds),
-                        weighted_pp: (perf.stats.weightedPP).toFixed(4),
+                    view: {
+                        time_str: sprintf('%02d:%02d', perf.time.minutes, perf.time.seconds),
                         weighting_percent: (perf.weighting * 100).toFixed(2),
-                        fc_percent_html: perf.data.perfect ? "<b>FC</b>" : (perf.data.maxcombo * 100 / parseInt(perf.beatmap.max_combo)).toFixed(0) + '%',
-                        acc: perf.stats.accuracy,
-                        no_mod: perf.data.enabled_mods == 0,
-                        mods: MOD_NAMES.filter((item, index) => {
-                            // AND, either 0 or 2^n from bit set
-                            return (perf.data.enabled_mods & Math.pow(2, index)) > 0; 
-                        }).join(','),
+                        fcPercent: (perf.data.maxcombo * 100 / parseInt(perf.beatmap.max_combo)).toFixed(0),
+                        mods: perf.mods.join(','),
                         time_ago: time_ago.ago(perf.data.date),
                         play_date_string: perf.data.date.toLocaleString()
                     }
                 })),
+
                 top_perf_aggregate: ((aggregate) => {
                     const avg_length = aggregate.length_sum / aggregate.weight_sum;
                     return {
@@ -153,16 +122,18 @@ export class OSURouter implements IServiceRouter {
                         avg_bpm: (aggregate.bpm_sum / aggregate.weight_sum).toFixed(2),
                         avg_acc: (aggregate.acc_sum / aggregate.weight_sum).toFixed(2),
                         avg_length: sprintf('%02d:%02d', avg_length / 60, avg_length % 60),
-                        fc_count: data.performances.reduce((acc, perf) => acc + (perf.data.maxcombo === parseInt(perf.beatmap.max_combo, 10) ? 1 : 0), 0)
+                        fc_count: aggregate.fc_count,
+                        perfect_count: aggregate.perfect_count
                     };
                 })(data.performances.reduce((acc, perf) => {
                     acc.intl_count[parseInt(perf.beatmap.language_id)].count += 1;
                     acc.genre_count[parseInt(perf.beatmap.genre_id)].count += 1;
                     acc.bpm_sum += parseInt(perf.beatmap.bpm) * perf.weighting;
-                    acc.length_sum += perf.stats.time.totalSeconds * perf.weighting;
-                    acc.acc_sum += perf.stats.accuracy * perf.weighting;
+                    acc.length_sum += perf.time.totalSeconds * perf.weighting;
+                    acc.acc_sum += perf.accuracy * perf.weighting;
                     acc.weight_sum += perf.weighting;
-                    acc.fc_count += perf.data.maxcombo === parseInt(perf.beatmap.max_combo, 10) ? 1 : 0;
+                    acc.fc_count += perf.isFC ? 1 : 0;
+                    acc.perfect_count += perf.isPerfect ? 1 : 0;
                     return acc;
                 }, {
                     intl_count: INTL_NAMES.slice().map((name) => { return { name: name, count: 0 }; }),
@@ -171,6 +142,7 @@ export class OSURouter implements IServiceRouter {
                     bpm_sum: 0,
                     acc_sum: 0,
                     fc_count: 0,
+                    perfect_count: 0,
                     weight_sum: 0
                 })),
 
